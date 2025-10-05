@@ -159,8 +159,7 @@
         foto1: (c.Foto1 ?? "").toString().trim(),
         foto2: (c.Foto2 ?? "").toString().trim()
       }));
-
-      encuentros = Papa.parse(csvPartidos, { header:true, skipEmptyLines:true }).data.map(p => ({
+        encuentros = Papa.parse(csvPartidos, { header:true, skipEmptyLines:true }).data.map(p => ({
         Fecha: (p.Fecha ?? "").trim(),
         Técnico: (p.Técnico ?? "").trim(),
         Condición: (p.Condición ?? "").trim(),
@@ -333,6 +332,10 @@ document.addEventListener("change", function(e) {
               </div>
               <div style="margin-top:6px;"><b>${p.Torneo}</b></div>
               <div><b>Estadio:</b> ${p.Estadio} - <b>Árbitro:</b> ${p.Árbitro}</div>
+              <div><b>Rival:</b> ${p.Rival}</div>
+              <div><b>Huracán:</b> ${p.Huracán}</div>
+              <div><b>Foto:</b> ${p.Foto}</div>
+              <div><b>Incidencias:</b> ${p.Incidencias}</div>
             </div>
           `;
         } else {
@@ -348,6 +351,10 @@ document.addEventListener("change", function(e) {
               </div>
               <div style="margin-top:6px;"><b>${p.Torneo}</b></div>
               <div><b>Estadio:</b> ${p.Estadio} - <b>Árbitro:</b> ${p.Árbitro}</div>
+              <div><b>Huracán:</b> ${p.Huracán}</div>
+              <div><b>Rival:</b> ${p.Rival}</div>
+              <div><b>Foto:</b> ${p.Foto}</div>
+              <div><b>Incidencias:</b> ${p.Incidencias}</div>
             </div>
           `;
         }
