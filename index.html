@@ -230,7 +230,7 @@ const delFutbolista = encuentros.filter(p =>
   norm(p.Huracán || "").split(/,\s*/).some(jugador => norm(jugador) === norm(nombreFutbolista))
 );
       const agg = {};
-      for (const e of delTecnico) {
+      for (const e of delFutbolista) {
         const comp = bucketCompetencia(e.Torneo);
         const cond = cap(norm(e.Condición));
         const sit = cap(norm(e.Situación));
@@ -256,7 +256,7 @@ const delFutbolista = encuentros.filter(p =>
               bloque += `
                 <li>
                   <label>
-                    <input type="checkbox" class="chkPartidos" data-comp="${comp}" data-cond="${cond}" data-sit="${tipo}" data-tecnico="${nombreTecnico}">
+                    <input type="checkbox" class="chkPartidos" data-comp="${comp}" data-cond="${cond}" data-sit="${tipo}" data-futbolista="${nombreFutbolista}">
                     ${icono} ${tipo}s: ${cantidad}
                   </label>
                   <div class="partidos-lista" style="display:none; margin-left:20px;"></div>
@@ -285,12 +285,12 @@ const delFutbolista = encuentros.filter(p =>
       const contenedor = e.target.closest("li").querySelector(".partidos-lista");
       contenedor.innerHTML = "";
       if (e.target.checked) {
-        const { comp, cond, sit, Huracan } = e.target.dataset;
+        const { comp, cond, sit, futbolista } = e.target.dataset;
         const partidos = encuentros.filter(p =>
-          norm(p.Huracán) === norm(huracan) &&
-          bucketCompetencia(p.Torneo) === comp &&
-          cap(norm(p.Condición)) === cond &&
-          cap(norm(p.Situación)) === sit
+          norm(p.Huracán || "").split(/,\s*/).some(j => norm(j) === norm(futbolista)) &&
+  bucketCompetencia(p.Torneo) === comp &&
+  cap(norm(p.Condición)) === cond &&
+  cap(norm(p.Situación)) === sit
         );
         if (partidos.length) {
           partidos.forEach(p => {
