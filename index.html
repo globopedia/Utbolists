@@ -225,64 +225,61 @@ function mostrarFutbolistas() {
       `;
     }
 
-    function renderEstadisticas(nombreFutbolista) {
-const delFutbolista = encuentros.filter(p => 
-  norm(p.Huracán || "")
-  .split(/[,\.;\)]\s*/)
-  .map(j => j.trim())
-  .filter(j => j.length > 0)
-  .some(futbolista => norm(futbolista) === norm(nombreFutbolista))
+function renderEstadisticas(nombreFutbolista) {
+  // Filtramos partidos donde aparezca el jugador
+  const delFutbolista = encuentros.filter(p => 
+    norm(p.Huracán || "")
+      .split(/[,\.;\)]\s*/)
+      .map(j => j.trim())
+      .filter(j => j.length > 0)
+      .some(futbolista => norm(futbolista) === norm(nombreFutbolista))
   );
-      const agg = {};
-      for (const e of delFutbolista) {
-        const comp = bucketCompetencia(e.Torneo);
-        const cond = cap(norm(e.Condición));
-        const sit = cap(norm(e.Situación));
-        if (!agg[comp]) agg[comp] = {};
-        if (!agg[comp][cond]) agg[comp][cond] = { Victoria:0, Empate:0, Derrota:0 };
-        if (SITUACIONES.includes(sit)) {
-          agg[comp][cond][sit] += 1;
-        }
-      }
-      let html = "";
-      for (const comp of ORDEN_COMPETENCIAS) {
-        if (!agg[comp]) continue;
-        let compHTML = "";
-        CONDICIONES.forEach((cond, idx) => {
-          const bucket = agg[comp][cond] || { Victoria:0, Empate:0, Derrota:0 };
-          const tot = bucket.Victoria + bucket.Empate + bucket.Derrota;
-          if (tot === 0) return;
-          let bloque = `<div class="stat-title">📍 ${cond}</div><ul>`;
-          ["Victoria","Empate","Derrota"].forEach(tipo => {
-            const cantidad = bucket[tipo];
-            if (cantidad > 0) {
-              const icono = tipo==="Victoria"?"✅":tipo==="Empate"?"🤝":"❌";
-              bloque += `
-                <li>
-                  <label>
-                    <input type="checkbox" class="chkPartidos" data-comp="${comp}" data-cond="${cond}" data-sit="${tipo}" data-futbolista="${nombreFutbolista}">
-                    ${icono} ${tipo}s: ${cantidad}
-                  </label>
-                  <div class="partidos-lista" style="display:none; margin-left:20px;"></div>
-                </li>
-              `;
-            }
-          });
-          bloque += "</ul>";
-          compHTML += bloque;
-          if (idx < CONDICIONES.length - 1) compHTML += `<div class="hr"></div>`;
-        });
-        if (compHTML) {
-          html += `
-            <div class="stat-group">
-              <div class="stat-title">🏆 ${comp}</div>
-              ${compHTML}
-            </div>
-          `;
-        }
-      }
-      return html || "<p>Sin datos disponibles</p>";
+
+  const agg = {};
+  for (const e of delFutbolista) {
+    const comp = bucketCompetencia(e.Torneo);
+    const sit = cap(norm(e.Situación));
+
+    if (!agg[comp]) agg[comp] = { Victoria:0, Empate:0, Derrota:0 };
+    if (SITUACIONES.includes(sit)) {
+      agg[comp][sit] += 1;
     }
+  }
+
+  let html = "";
+  for (const comp of ORDEN_COMPETENCIAS) {
+    if (!agg[comp]) continue;
+    const bucket = agg[comp];
+    const tot = bucket.Victoria + bucket.Empate + bucket.Derrota;
+    if (tot === 0) continue;
+
+    let bloque = "<ul>";
+    ["Victoria","Empate","Derrota"].forEach(tipo => {
+      const cantidad = bucket[tipo];
+      if (cantidad > 0) {
+        const icono = tipo==="Victoria"?"✅":tipo==="Empate"?"🤝":"❌";
+        bloque += `
+          <li>
+            <label>
+              <input type="checkbox" class="chkPartidos" data-comp="${comp}" data-sit="${tipo}" data-futbolista="${nombreFutbolista}">
+              ${icono} ${tipo}s: ${cantidad}
+            </label>
+            <div class="partidos-lista" style="display:none; margin-left:20px;"></div>
+          </li>
+        `;
+      }
+    });
+    bloque += "</ul>";
+
+    html += `
+      <div class="stat-group">
+        <div class="stat-title">🏆 ${comp}</div>
+        ${bloque}
+      </div>
+    `;
+  }
+  return html || "<p>Sin datos disponibles</p>";
+}
 
     document.addEventListener("change", function(e) {
       if (!e.target.classList.contains("chkPartidos")) return;
