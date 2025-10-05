@@ -224,23 +224,21 @@ function mostrarFutbolistas() {
 </div>
       `;
     }
-
 function renderEstadisticas(nombreFutbolista) {
-  // Filtramos partidos donde aparezca el jugador
-  const delFutbolista = encuentros.filter(p => 
-    norm(p.Huracán || "")
-      .split(/[,\.;]/)   // solo corta por coma, punto y coma, o punto
-  .map(j => j.replace(/^\(?\d*\)?/, "").trim())  // borra "(48", ")" o "48)" inicial
-  .map(j => j.replace(/\)$/, "").trim())         // borra ")" final si queda colgado
-  .filter(j => j.length > 0);
-      .some(futbolista => norm(futbolista) === norm(nombreFutbolista))
-  );
+  const delFutbolista = encuentros.filter(p => {
+    const jugadores = (p.Huracán || "")
+      .split(/[,\.;]/)                             // cortamos por coma, punto y coma o punto
+      .map(j => j.replace(/^\(?\d*\)?/, "").trim()) // borra "(48", "48)" o similares al inicio
+      .map(j => j.replace(/\)$/, "").trim())        // borra ")" final si quedó colgado
+      .filter(j => j.length > 0);
+
+    return jugadores.some(j => norm(j) === norm(nombreFutbolista));
+  });
 
   const agg = {};
   for (const e of delFutbolista) {
     const comp = bucketCompetencia(e.Torneo);
     const sit = cap(norm(e.Situación));
-
     if (!agg[comp]) agg[comp] = { Victoria:0, Empate:0, Derrota:0 };
     if (SITUACIONES.includes(sit)) {
       agg[comp][sit] += 1;
@@ -250,11 +248,11 @@ function renderEstadisticas(nombreFutbolista) {
   let html = "";
   for (const comp of ORDEN_COMPETENCIAS) {
     if (!agg[comp]) continue;
+    let compHTML = "";
     const bucket = agg[comp];
     const tot = bucket.Victoria + bucket.Empate + bucket.Derrota;
     if (tot === 0) continue;
-
-    let bloque = "<ul>";
+    let bloque = `<ul>`;
     ["Victoria","Empate","Derrota"].forEach(tipo => {
       const cantidad = bucket[tipo];
       if (cantidad > 0) {
@@ -262,7 +260,9 @@ function renderEstadisticas(nombreFutbolista) {
         bloque += `
           <li>
             <label>
-              <input type="checkbox" class="chkPartidos" data-comp="${comp}" data-sit="${tipo}" data-futbolista="${nombreFutbolista}">
+              <input type="checkbox" class="chkPartidos" 
+                data-comp="${comp}" data-sit="${tipo}" 
+                data-futbolista="${nombreFutbolista}">
               ${icono} ${tipo}s: ${cantidad}
             </label>
             <div class="partidos-lista" style="display:none; margin-left:20px;"></div>
@@ -271,18 +271,20 @@ function renderEstadisticas(nombreFutbolista) {
       }
     });
     bloque += "</ul>";
+    compHTML += bloque;
 
-    html += `
-      <div class="stat-group">
-        <div class="stat-title">🏆 ${comp}</div>
-        ${bloque}
-      </div>
-    `;
+    if (compHTML) {
+      html += `
+        <div class="stat-group">
+          <div class="stat-title">🏆 ${comp}</div>
+          ${compHTML}
+        </div>
+      `;
+    }
   }
   return html || "<p>Sin datos disponibles</p>";
 }
-
-// Manejador de checkboxes (muestra partidos por filtro)
+    // Manejador de checkboxes (muestra partidos por filtro)
 document.addEventListener("change", function(e) {
   if (!e.target.classList.contains("chkPartidos")) return;
   const contenedor = e.target.closest("li").querySelector(".partidos-lista");
