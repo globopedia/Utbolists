@@ -147,7 +147,7 @@
   foto: (c.Foto ?? "").trim(),
 }));
       
-      tecnicos = Papa.parse(csvUtbolists, { header:true, skipEmptyLines:true }).data.map(c => ({
+      futbolistas = Papa.parse(csvPartidos, { header:true, skipEmptyLines:true }).data.map(c => ({
         id: (c.ID ?? "").toString().trim(),
         futbolista: (c["Futbolista"] ?? "").toString().trim(),
         nombre: (c.Nombre ?? "").toString().trim(),
@@ -184,7 +184,7 @@
         Incidencias: (p.Incidencias ?? "").trim()
       }));
 
-      llenarSelectTecnicos();
+      llenarSelectFutbolistas();
     });
 
     function llenarSelectFutbolistas() {
