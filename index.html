@@ -141,13 +141,6 @@
     ])
     .then(([csvFutbolistas, csvPartidos]) => {
     futbolistas = Papa.parse(csvFutbolistas, { header: true, skipEmptyLines: true }).data.map(c => ({
-  id: (c.ID ?? "").trim(),
-  futbolista: (c["Futbolista"] ?? "").trim(),
-  nombre: (c.Nombre ?? "").trim(),
-  foto: (c.Foto ?? "").trim(),
-}));
-      
-      futbolistas = Papa.parse(csvPartidos, { header:true, skipEmptyLines:true }).data.map(c => ({
         id: (c.ID ?? "").toString().trim(),
         futbolista: (c["Futbolista"] ?? "").toString().trim(),
         nombre: (c.Nombre ?? "").toString().trim(),
@@ -163,7 +156,7 @@
         procedencia: (c.Procedencia ?? "").toString().trim(),
         destino: (c.Destino ?? "").toString().trim(),
         trayectoria: (c.Trayectoria ?? "").toString().trim(),
-        foto1: (c.Foto1 ?? "").toString().trim()
+        foto1: (c.Foto1 ?? "").toString().trim(),
         foto2: (c.Foto2 ?? "").toString().trim()
       }));
 
