@@ -215,7 +215,9 @@
     }
 
     function renderEstadisticas(nombreFutbolista) {
-      const delFutbolista = encuentros.filter(p => norm(p.Futbolista) === norm(nombreFutbolista));
+const delFutbolista = encuentros.filter(p => 
+  norm(p.Huracán || "").split(/,\s*/).some(jugador => norm(jugador) === norm(nombreFutbolista))
+);
       const agg = {};
       for (const e of delTecnico) {
         const comp = bucketCompetencia(e.Torneo);
