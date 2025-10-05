@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Técnicos — Huracán</title>
+  <title>Futbolistas — Huracán</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=MuseoModerno:wght@500&display=swap" rel="stylesheet">
   <style>
@@ -38,17 +38,17 @@
 </head>
 <body>
   <img src="https://globopedia.github.io/Artids/logo_globopedia.png" alt="Logo Huracán" class="logo" />
-  <h1>📜 Técnicos</h1>
+  <h1>📜 Futbolistas</h1>
 
   <div style="text-align:center;">
-    <label>Seleccioná técnico: </label>
-    <select id="tecnicoSelect"></select>
+    <label>Seleccioná futbolista: </label>
+    <select id="futbolistaSelect"></select>
   </div>
 
   <div id="tecnicoInfo" class="club-card" style="display:none;"></div>
 
   <script>
-    const tecnicosURL = "https://globopedia.github.io/Ecnics/Ecnics.csv?v=" + Date.now();
+    const tecnicosURL = "https://globopedia.github.io/Utbolists/Utbolists.csv?v=" + Date.now();
     const partidosURL = "https://globopedia.github.io/Artids/Encuentros_Huracan.csv?v=" + Date.now();
 
     let tecnicos = [];
@@ -139,10 +139,10 @@
       fetch(tecnicosURL).then(r => r.text()),
       fetch(partidosURL).then(r => r.text())
     ])
-    .then(([csvEcnics, csvPartidos]) => {
-      tecnicos = Papa.parse(csvEcnics, { header:true, skipEmptyLines:true }).data.map(c => ({
+    .then(([csvUtbolists, csvPartidos]) => {
+      tecnicos = Papa.parse(csvUtbolists, { header:true, skipEmptyLines:true }).data.map(c => ({
         id: (c.ID ?? "").toString().trim(),
-        tecnico: (c["Técnico"] ?? "").toString().trim(),
+        tecnico: (c["Futbolista"] ?? "").toString().trim(),
         nombre: (c.Nombre ?? "").toString().trim(),
         nacimiento: (c.Nacimiento ?? "").toString().trim(),
         lugarnacimiento: (c.LugarNacimiento?? "").toString().trim(),
@@ -214,8 +214,8 @@
       `;
     }
 
-    function renderEstadisticas(nombreTecnico) {
-      const delTecnico = encuentros.filter(p => norm(p.Técnico) === norm(nombreTecnico));
+    function renderEstadisticas(nombreFutbolista) {
+      const delFutbolista = encuentros.filter(p => norm(p.Futbolista) === norm(nombreFutbolista));
       const agg = {};
       for (const e of delTecnico) {
         const comp = bucketCompetencia(e.Torneo);
@@ -272,9 +272,9 @@
       const contenedor = e.target.closest("li").querySelector(".partidos-lista");
       contenedor.innerHTML = "";
       if (e.target.checked) {
-        const { comp, cond, sit, tecnico } = e.target.dataset;
+        const { comp, cond, sit, Huracan } = e.target.dataset;
         const partidos = encuentros.filter(p =>
-          norm(p.Técnico) === norm(tecnico) &&
+          norm(p.Huracán) === norm(huracan) &&
           bucketCompetencia(p.Torneo) === comp &&
           cap(norm(p.Condición)) === cond &&
           cap(norm(p.Situación)) === sit
