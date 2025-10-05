@@ -45,10 +45,10 @@
     <select id="futbolistaSelect"></select>
   </div>
 
-  <div id="tecnicoInfo" class="club-card" style="display:none;"></div>
+  <div id="futbolistaInfo" class="club-card" style="display:none;"></div>
 
   <script>
-    const tecnicosURL = "https://globopedia.github.io/Utbolists/Utbolists.csv?v=" + Date.now();
+    const futbolistasURL = "https://globopedia.github.io/Utbolists/Utbolists.csv?v=" + Date.now();
     const partidosURL = "https://globopedia.github.io/Artids/Encuentros_Huracan.csv?v=" + Date.now();
 
     let tecnicos = [];
@@ -184,7 +184,7 @@
       const sel = document.getElementById("futbolistaSelect");
       sel.innerHTML = "<option value=''>-- Seleccionar --</option>";
       futbolistas.forEach(a => {
-        if (a.tecnico) {
+        if (a.futbolista) {
           const opt = document.createElement("option");
           opt.value = a.futbolista;
           opt.textContent = InvertirNombre(a.futbolista);
@@ -194,30 +194,34 @@
       sel.addEventListener("change", mostrarFutbolistas);
     }
 
-    function mostrarTecnico() {
-      const tecnicoId = document.getElementById("tecnicoSelect").value;
-      const tecnico = tecnicos.find(a => a.tecnico === tecnicoId);
-      if (!tecnico) {
-        document.getElementById("tecnicoInfo").style.display = "none";
-        return;
-      }
+function mostrarFutbolistas() {
+  const futbolistaId = document.getElementById("futbolistaSelect").value;
+  const futbolista = futbolistas.find(a => a.futbolista === futbolistaId);
+  if (!futbolista) {
+    document.getElementById("futbolistaInfo").style.display = "none";
+    return;
+  }
 
-      const cont = document.getElementById("tecnicoInfo");
+      const cont = document.getElementById("futbolistaInfo");
       cont.style.display = "block";
       cont.innerHTML = `
         <div class="club-header">
-          ${tecnico.foto ? `<img src="${tecnico.foto}" alt="${tecnico.tecnico}" style="width:105px;height:140px;object-fit:cover;border-radius:8px;">` : ""}
-          <h2>${tecnico.tecnico}</h2>
-        </div>
-        <p><b>Nombre completo:</b> ${tecnico.nombre}</p>
-        <p><b>Nacimiento:</b> ${tecnico.nacimiento}, en ${tecnico.lugarnacimiento}</p>
-        <p><b>Muerte:</b> ${tecnico.muerte}, en ${tecnico.lugarmuerte}</p>
-        <p><b>Biografía:</b> ${tecnico.biografía}</p>
-        <p><b>Trayectoria:</b> ${tecnico.trayectoria}</p>
-        <div class="stats">
-          <h3 style="color:#FF0000;">📊 Partidos dirigidos en Huracán</h3>
-          ${renderEstadisticas(tecnico.tecnico)}
-        </div>
+      ${futbolista.foto1 ? `<img src="${futbolista.foto1}" alt="${futbolista.futbolista}" style="width:105px;height:140px;object-fit:cover;border-radius:8px;">` : ""}
+      <h2>${futbolista.futbolista}</h2>
+    </div>
+    <p><b>Nombre completo:</b> ${futbolista.nombre}</p>
+    <p><b>Posición:</b> ${futbolista.posicion}</p>
+    <p><b>Nacimiento:</b> ${futbolista.fechanac}, en ${futbolista.lugarnac}</p>
+    <p><b>Muerte:</b> ${futbolista.fechamuerte}, en ${futbolista.lugarmuerte}</p>
+    <p><b>Peso:</b> ${futbolista.peso} kg — <b>Altura:</b> ${futbolista.altura} m</p>
+    <p><b>Procedencia:</b> ${futbolista.procedencia}</p>
+    <p><b>Destino:</b> ${futbolista.destino}</p>
+    <p><b>Trayectoria:</b> ${futbolista.trayectoria}</p>
+    <p><b>Biografía:</b> ${futbolista.biografía}</p>
+       <div class="stats">
+  <h3 style="color:#FF0000;">📊 Partidos jugados en Huracán</h3>
+  ${renderEstadisticas(futbolista.futbolista)}
+</div>
       `;
     }
 
