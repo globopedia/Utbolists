@@ -229,7 +229,7 @@ function renderEstadisticas(nombreFutbolista) {
   // Filtramos partidos donde aparezca el jugador
   const delFutbolista = encuentros.filter(p => 
     norm(p.Huracán || "")
-      .split(/,\.;\)\s*/)
+      .split(/[,\.;\)]\s*/)
       .map(j => j.trim())
       .filter(j => j.length > 0)
       .some(futbolista => norm(futbolista) === norm(nombreFutbolista))
@@ -293,7 +293,7 @@ document.addEventListener("change", function(e) {
     const partidos = encuentros.filter(p => {
       // el jugador aparece en la celda de Huracán
       const jugadores = norm(p.Huracán || "")
-        .split(/,\.;\)\s*/)
+        .split(/[,\.;\)]\s*/)
         .map(j => j.trim())
         .filter(j => j.length > 0);
 
