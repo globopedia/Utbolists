@@ -291,10 +291,7 @@ const delFutbolista = encuentros.filter(p =>
         const { comp, cond, sit, futbolista } = e.target.dataset;
         const partidos = encuentros.filter(p =>
           norm(p.Huracán || "").split(/[,\.;\)]\s*/)
-          .map(j => j.trim())
-  .filter(j => j.length > 0)
-  .some(jugador => norm(jugador) === norm(nombreFutbolista))
-          .some(j => norm(j) === norm(futbolista)) &&
+          .map(j => j.trim()).filter(j => j.length > 0)..some(j => norm(j) === norm(futbolista)) &&
   bucketCompetencia(p.Torneo) === comp &&
   cap(norm(p.Condición)) === cond &&
   cap(norm(p.Situación)) === sit
