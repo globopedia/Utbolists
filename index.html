@@ -225,15 +225,21 @@ function mostrarFutbolistas() {
       `;
     }
 function renderEstadisticas(nombreFutbolista) {
-  const delFutbolista = encuentros.filter(p => {
-    const jugadores = (p.Huracán || "")
-      .split(/[,\.;]/)                             // cortamos por coma, punto y coma o punto
-      .map(j => j.replace(/^\(?\d*\)?/, "").trim()) // borra "(48", "48)" o similares al inicio
-      .map(j => j.replace(/\)$/, "").trim())        // borra ")" final si quedó colgado
-      .filter(j => j.length > 0);
-
-    return jugadores.some(j => norm(j) === norm(nombreFutbolista));
-  });
+  const delFutbolista = encuentros.filter(p => 
+    norm(p.Huracán || "")
+      // separamos por coma, punto, ; o paréntesis de cierre
+      .split(/[,\.;\)]\s*/)
+      // quitamos "(67 ", "(46 " o cualquier número con paréntesis
+      .map(j => j.replace(/\(\d+\s*/g, ""))
+      // quitamos paréntesis de cierre sueltos
+      .map(j => j.replace(/\)$/g, ""))
+      // limpiamos espacios
+      .map(j => j.trim())
+      // descartamos vacíos
+      .filter(j => j.length > 0)
+      // comparamos contra el nombre del futbolista
+      .some(f => norm(f) === norm(nombreFutbolista))
+  );
 
   const agg = {};
   for (const e of delFutbolista) {
@@ -248,11 +254,11 @@ function renderEstadisticas(nombreFutbolista) {
   let html = "";
   for (const comp of ORDEN_COMPETENCIAS) {
     if (!agg[comp]) continue;
-    let compHTML = "";
     const bucket = agg[comp];
     const tot = bucket.Victoria + bucket.Empate + bucket.Derrota;
     if (tot === 0) continue;
-    let bloque = `<ul>`;
+
+    let bloque = "<ul>";
     ["Victoria","Empate","Derrota"].forEach(tipo => {
       const cantidad = bucket[tipo];
       if (cantidad > 0) {
@@ -260,9 +266,7 @@ function renderEstadisticas(nombreFutbolista) {
         bloque += `
           <li>
             <label>
-              <input type="checkbox" class="chkPartidos" 
-                data-comp="${comp}" data-sit="${tipo}" 
-                data-futbolista="${nombreFutbolista}">
+              <input type="checkbox" class="chkPartidos" data-comp="${comp}" data-sit="${tipo}" data-futbolista="${nombreFutbolista}">
               ${icono} ${tipo}s: ${cantidad}
             </label>
             <div class="partidos-lista" style="display:none; margin-left:20px;"></div>
@@ -271,20 +275,17 @@ function renderEstadisticas(nombreFutbolista) {
       }
     });
     bloque += "</ul>";
-    compHTML += bloque;
 
-    if (compHTML) {
-      html += `
-        <div class="stat-group">
-          <div class="stat-title">🏆 ${comp}</div>
-          ${compHTML}
-        </div>
-      `;
-    }
+    html += `
+      <div class="stat-group">
+        <div class="stat-title">🏆 ${comp}</div>
+        ${bloque}
+      </div>
+    `;
   }
   return html || "<p>Sin datos disponibles</p>";
 }
-// --- Función auxiliar para limpiar nombres de jugadores ---
+    // --- Función auxiliar para limpiar nombres de jugadores ---
 function limpiarNombreJugador(j) {
   return j
     .replace(/^\(?\d*\)?/, "")   // quita "(48" o "48)"
@@ -292,7 +293,7 @@ function limpiarNombreJugador(j) {
     .trim();
 }
 
-// --- Listener de checkboxes ---
+// Manejador de checkboxes: muestra lista de partidos según el futbolista
 document.addEventListener("change", function(e) {
   if (!e.target.classList.contains("chkPartidos")) return;
 
@@ -302,18 +303,18 @@ document.addEventListener("change", function(e) {
   if (e.target.checked) {
     const { comp, sit, futbolista } = e.target.dataset;
 
-    const partidos = encuentros.filter(p => {
-      const jugadores = (p.Huracán || "")
-        .split(/[,\.;]/)
-        .map(limpiarNombreJugador)
-        .filter(j => j.length > 0);
-
-      return (
-        jugadores.some(j => norm(j) === norm(futbolista)) &&
-        bucketCompetencia(p.Torneo) === comp &&
-        cap(norm(p.Situación)) === sit
-      );
-    });
+    const partidos = encuentros.filter(p =>
+      bucketCompetencia(p.Torneo) === comp &&
+      cap(norm(p.Situación)) === sit &&
+      // verificar que el jugador esté en la columna Huracán
+      norm(p.Huracán || "")
+        .split(/[,\.;\)]\s*/)
+        .map(j => j.replace(/\(\d+\s*/g, ""))   // elimina "(67 "
+        .map(j => j.replace(/\)$/g, ""))        // elimina ")"
+        .map(j => j.trim())
+        .filter(j => j.length > 0)
+        .some(f => norm(f) === norm(futbolista))
+    );
 
     if (partidos.length) {
       partidos.forEach(p => {
@@ -328,29 +329,25 @@ document.addEventListener("change", function(e) {
                 <img class="escudo-rival" src="${getEscudo(p.Club)}" alt="${p.Club}" />
                 <div class="resultado2-box">${p.Resultado2}</div>
                 <div class="resultado1-box">${p.Resultado1}</div>
-                <img class="escudo-huracan" src="${getEscudo('Huracán')}" alt="Huracán">
+                <img class="escudo-huracan" src="${getEscudo("Huracán")}" alt="Huracán">
               </div>
-              <div style="margin-top:6px;"><b>${p.Torneo}</b> - ${p.Fecha}</div>
+              <div style="margin-top:6px;"><b>${p.Torneo}</b></div>
               <div><b>Estadio:</b> ${p.Estadio} - <b>Árbitro:</b> ${p.Árbitro}</div>
-              <div><b>${p.Club}:</b> ${p.Rival}</div>
-              <div><b>Huracán:</b> ${p.Huracán}</div>
             </div>
           `;
         } else {
-          // Huracán local/neutro → Huracán primero
+          // Huracán local/neutral → Huracán primero
           bloqueHTML = `
             <div class="partido-card">
               ${getTorneoImage(p.Torneo)}
               <div class="resultado-con-escudo">
-                <img class="escudo-huracan" src="${getEscudo('Huracán')}" alt="Huracán">
+                <img class="escudo-huracan" src="${getEscudo("Huracán")}" alt="Huracán">
                 <div class="resultado1-box">${p.Resultado1}</div>
                 <div class="resultado2-box">${p.Resultado2}</div>
                 <img class="escudo-rival" src="${getEscudo(p.Club)}" alt="${p.Club}" />
               </div>
-              <div style="margin-top:6px;"><b>${p.Torneo}</b> - ${p.Fecha}</div>
+              <div style="margin-top:6px;"><b>${p.Torneo}</b></div>
               <div><b>Estadio:</b> ${p.Estadio} - <b>Árbitro:</b> ${p.Árbitro}</div>
-              <div><b>Huracán:</b> ${p.Huracán}</div>
-              <div><b>${p.Club}:</b> ${p.Rival}</div>
             </div>
           `;
         }
