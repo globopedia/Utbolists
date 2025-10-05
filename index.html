@@ -136,21 +136,35 @@
     }
 
     Promise.all([
-      fetch(tecnicosURL).then(r => r.text()),
+      fetch(futbolistasURL).then(r => r.text()),
       fetch(partidosURL).then(r => r.text())
     ])
-    .then(([csvUtbolists, csvPartidos]) => {
+    .then(([csvFutbolistas, csvPartidos]) => {
+    futbolistas = Papa.parse(csvFutbolistas, { header: true, skipEmptyLines: true }).data.map(c => ({
+  id: (c.ID ?? "").trim(),
+  futbolista: (c["Futbolista"] ?? "").trim(),
+  nombre: (c.Nombre ?? "").trim(),
+  foto: (c.Foto ?? "").trim(),
+}));
+      
       tecnicos = Papa.parse(csvUtbolists, { header:true, skipEmptyLines:true }).data.map(c => ({
         id: (c.ID ?? "").toString().trim(),
-        tecnico: (c["Futbolista"] ?? "").toString().trim(),
+        futbolista: (c["Futbolista"] ?? "").toString().trim(),
         nombre: (c.Nombre ?? "").toString().trim(),
         nacimiento: (c.Nacimiento ?? "").toString().trim(),
-        lugarnacimiento: (c.LugarNacimiento?? "").toString().trim(),
-        muerte: (c.Muerte ?? "").toString().trim(),
+        posicion: (c.Posición ?? "").toString().trim(),
+        fechanac: (c.FechaNacimiento?? "").toString().trim(),
+        lugarnac: (c.LugarNacimiento?? "").toString().trim(),
+        fechamuerte: (c.FechaMuerte ?? "").toString().trim(),
         lugarmuerte: (c.LugarMuerte ?? "").toString().trim(),
+        peso: (c.Peso ?? "").toString().trim(),
+        altura: (c.Altura ?? "").toString().trim(),
         biografía: (c.Biografía ?? "").toString().trim(),
+        procedencia: (c.Procedencia ?? "").toString().trim(),
+        destino: (c.Destino ?? "").toString().trim(),
         trayectoria: (c.Trayectoria ?? "").toString().trim(),
-        foto: (c.Foto ?? "").toString().trim()
+        foto1: (c.Foto1 ?? "").toString().trim()
+        foto2: (c.Foto2 ?? "").toString().trim()
       }));
 
       encuentros = Papa.parse(csvPartidos, { header:true, skipEmptyLines:true }).data.map(p => ({
@@ -173,18 +187,18 @@
       llenarSelectTecnicos();
     });
 
-    function llenarSelectTecnicos() {
-      const sel = document.getElementById("tecnicoSelect");
+    function llenarSelectFutbolistas() {
+      const sel = document.getElementById("futbolistaSelect");
       sel.innerHTML = "<option value=''>-- Seleccionar --</option>";
-      tecnicos.forEach(a => {
+      futbolistas.forEach(a => {
         if (a.tecnico) {
           const opt = document.createElement("option");
-          opt.value = a.tecnico;
-          opt.textContent = InvertirNombre(a.tecnico);
+          opt.value = a.futbolista;
+          opt.textContent = InvertirNombre(a.futbolista);
           sel.appendChild(opt);
         }
       });
-      sel.addEventListener("change", mostrarTecnico);
+      sel.addEventListener("change", mostrarFutbolistas);
     }
 
     function mostrarTecnico() {
