@@ -284,80 +284,36 @@ function renderEstadisticas(nombreFutbolista) {
   }
   return html || "<p>Sin datos disponibles</p>";
 }
-    // Manejador de checkboxes (muestra partidos por filtro)
+// --- Función auxiliar para limpiar nombres de jugadores ---
+function limpiarNombreJugador(j) {
+  return j
+    .replace(/^\(?\d*\)?/, "")   // quita "(48" o "48)"
+    .replace(/\)$/, "")          // quita ")" final
+    .trim();
+}
+
+// --- Listener de checkboxes ---
 document.addEventListener("change", function(e) {
   if (!e.target.classList.contains("chkPartidos")) return;
+
   const contenedor = e.target.closest("li").querySelector(".partidos-lista");
   contenedor.innerHTML = "";
+
   if (e.target.checked) {
     const { comp, sit, futbolista } = e.target.dataset;
 
-    // filtrar partidos del futbolista
     const partidos = encuentros.filter(p => {
-      // el jugador aparece en la celda de Huracán
-      const jugadores = norm(p.Huracán || "")
-        .split(/[,\.;]/)   // solo corta por coma, punto y coma, o punto
-  .map(j => j.replace(/^\(?\d*\)?/, "").trim())  // borra "(48", ")" o "48)" inicial
-  .map(j => j.replace(/\)$/, "").trim())         // borra ")" final si queda colgado
-  .filter(j => j.length > 0);
-      return jugadores.some(j => norm(j) === norm(futbolista)) &&
-             bucketCompetencia(p.Torneo) === comp &&
-             cap(norm(p.Situación)) === sit;
+      const jugadores = (p.Huracán || "")
+        .split(/[,\.;]/)
+        .map(limpiarNombreJugador)
+        .filter(j => j.length > 0);
+
+      return (
+        jugadores.some(j => norm(j) === norm(futbolista)) &&
+        bucketCompetencia(p.Torneo) === comp &&
+        cap(norm(p.Situación)) === sit
+      );
     });
-
-    if (partidos.length) {
-      partidos.forEach(p => {
-        let bloqueHTML = "";
-
-        if ((p.Condición || "").toLowerCase() === "visitante") {
-          bloqueHTML = `
-            <div class="partido-card">
-              ${getTorneoImage(p.Torneo)}
-              <img class="escudo-rival" src="${getEscudo(p.Club)}" alt="${p.Club}" />
-              <div class="resultado2-box">${p.Resultado2}</div>
-              <div class="resultado1-box">${p.Resultado1}</div>
-              <img class="escudo-huracan" src="${getEscudo('Huracán')}" alt="Huracán">
-              <div><b>${p.Torneo}</b></div>
-              <div><b>Estadio:</b> ${p.Estadio} - <b>Árbitro:</b> ${p.Árbitro}</div>
-              <div><b>${p.Club}:</b> ${p.Rival}</div>
-              <div><b>Huracán:</b> ${p.Huracán}</div>
-              ${ p.Foto ? `<div style="margin:6px 0;"><img src="${p.Foto}" style="max-width:250px;border-radius:8px;"></div>` : "" }
-              <div>${renderIncidencias(p.Incidencias)}</div>
-            </div>
-          `;
-        } else {
-          bloqueHTML = `
-            <div class="partido-card">
-              ${getTorneoImage(p.Torneo)}
-              <img class="escudo-huracan" src="${getEscudo('Huracán')}" alt="Huracán">
-              <div class="resultado1-box">${p.Resultado1}</div>
-              <div class="resultado2-box">${p.Resultado2}</div>
-              <img class="escudo-rival" src="${getEscudo(p.Club)}" alt="${p.Club}" />
-              <div><b>${p.Torneo}</b></div>
-              <div><b>Estadio:</b> ${p.Estadio} - <b>Árbitro:</b> ${p.Árbitro}</div>
-              <div><b>Huracán:</b> ${p.Huracán}</div>
-              <div><b>${p.Club}:</b> ${p.Rival}</div>
-              ${ p.Foto ? `<div style="margin:6px 0;"><img src="${p.Foto}" style="max-width:250px;border-radius:8px;"></div>` : "" }
-              <div>${renderIncidencias(p.Incidencias)}</div>
-            </div>
-          `;
-        }
-
-        contenedor.innerHTML += `
-          <div class="acordeon">
-            <div class="acordeon-header">${p.Fecha}</div>
-            <div class="acordeon-body cerrado">${bloqueHTML}</div>
-          </div>
-        `;
-      });
-    } else {
-      contenedor.innerHTML = "<i>No hay partidos registrados</i>";
-    }
-    contenedor.style.display = "block";
-  } else {
-    contenedor.style.display = "none";
-  }
-});
 
     document.addEventListener("click", function(e) {
       if (e.target.classList.contains("acordeon-header")) {
