@@ -210,7 +210,14 @@ function mostrarFutbolistas() {
       ${futbolista.foto1 ? `<img src="${futbolista.foto1}" alt="${futbolista.futbolista}" style="width:105px;height:140px;object-fit:cover;border-radius:8px;">` : ""}
       <div style="text-align:center;">
   <h2>${futbolista.futbolista}</h2>
-  ${futbolista.pais ? `<img src="https://globopedia.github.io/Artids/Banderas/${encodeURIComponent(futbolista.pais)}.png" alt="${futbolista.pais}" style="height:30px; margin-top:4px;">` : ""}
+  ${futbolista.pais
+  ? futbolista.pais
+      .split(/[,\/]/) // separa por coma o barra
+      .map(p => p.trim())
+      .filter(p => p.length > 0)
+      .map(p => `<img src="https://globopedia.github.io/Banderas/${encodeURIComponent(p)}.png" alt="${p}" title="${p}" style="height:30px; margin:4px;">`)
+      .join("")
+  : ""}
 </div>
     </div>
     <p><b>Nombre completo:</b> ${futbolista.nombre}</p>
