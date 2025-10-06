@@ -227,15 +227,10 @@ function renderEstadisticas(nombreFutbolista) {
   const delFutbolista = encuentros.filter(p => 
     norm(p.Huracán || "")
       // separamos por coma, punto, ; o paréntesis de cierre
-      .split(/[,\.;\)]\s*/)
-      // quitamos "(67 ", "(46 " o cualquier número con paréntesis
-      .map(j => j.replace(/\(\d+\s*/g, ""))
-      // quitamos paréntesis de cierre sueltos
-      .map(j => j.replace(/\)$/g, ""))
-      // limpiamos espacios
-      .map(j => j.trim())
-      // descartamos vacíos
-      .filter(j => j.length > 0)
+      const jugadores = (p.Huracán || "")
+  .split(/[,\.;\)]\s*/)     // separa por coma / ; / . / ) (igual que antes)
+  .map(limpiarNombreJugador)
+  .filter(j => j.length > 0);
       // comparamos contra el nombre del futbolista
       .some(f => norm(f) === norm(nombreFutbolista))
   );
@@ -311,13 +306,12 @@ document.addEventListener("change", function(e) {
       cap(norm(p.Situación)) === sit &&
       // verificar que el jugador esté en la columna Huracán
       norm(p.Huracán || "")
-        .split(/[,\.;\)]\s*/)
-        .map(j => j.replace(/\(\d+\s*/g, ""))   // elimina "(67 "
-        .map(j => j.replace(/\)$/g, ""))        // elimina ")"
-        .map(j => j.trim())
-        .filter(j => j.length > 0)
-        .some(f => norm(f) === norm(futbolista))
-    );
+       norm(p.Huracán || "")
+  .split(/[,\.;\)]\s*/)
+  .map(limpiarNombreJugador)
+  .filter(j => j.length > 0)
+  .some(f => norm(f) === norm(futbolista))
+      );
 
     if (partidos.length) {
       partidos.forEach(p => {
