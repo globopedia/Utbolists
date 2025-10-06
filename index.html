@@ -215,7 +215,7 @@ function mostrarFutbolistas() {
       .split(/[,\/]/) // separa por coma o barra
       .map(p => p.trim())
       .filter(p => p.length > 0)
-      .map(p => `<img src="https://globopedia.github.io/Banderas/${encodeURIComponent(p)}.png" alt="${p}" title="${p}" style="height:30px; margin:4px;">`)
+      .map(p => `<img src="https://globopedia.github.io/Artids/Banderas/${encodeURIComponent(p)}.png" alt="${p}" title="${p}" style="height:30px; margin:4px;">`)
       .join("")
   : ""}
 </div>
