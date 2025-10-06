@@ -34,6 +34,15 @@
     .escudo-huracan, .escudo-rival { width: 50px; height: 50px; object-fit: contain; position: relative; top: 6px; vertical-align: middle; }
     .resultado-con-escudo { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content:center; }
     .stat-title small { color:#666; font-weight:normal; margin-left:6px; }
+
+  .bandera {
+  height: 30px;
+  margin: 4px;
+  border-radius: 4px;
+  box-shadow: 0 0 2px rgba(0,0,0,0.2);
+  vertical-align: middle;
+}
+    
   </style>
 </head>
 <body>
@@ -57,8 +66,8 @@
     const norm = (t) => (t || "").toString().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase();
     const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : s;
 
-    const ORDEN_COMPETENCIAS = ["Apertura 2007","Clausura 2008","Apertura 2008","Clausura 2009","Apertura 2009","Clausura 2010","Apertura 2010",
-"Clausura 2011","Desempate Descenso 2011","Campeonato B Nacional 2011/12","Copa Argentina 2012",
+    const ORDEN_COMPETENCIAS = ["Apertura 2007/08","Clausura 2007/08","Apertura 2008/09","Clausura 2008/09","Apertura 2009/10","Clausura 2009/10","Apertura 2010/11",
+"Clausura 2010/11","Desempate Descenso 2011","Campeonato B Nacional 2011/12","Copa Argentina 2012",
 "Campeonato B Nacional 2012/13","Copa Argentina 2013","Campeonato B Nacional 2013/14","Desempate 3° Puesto BN 2013/14","Copa Argentina 2014",
 "Desempate 3° Puesto NB 2013/14","Campeonato B Nacional 2014","Desempate 5° Puesto NB 2014",
 "Copa Libertadores 2015","Campeonato 2015","Supercopa 2015","Copa Argentina 2015","Copa Sudamericana 2015",
@@ -74,14 +83,14 @@
 
     function bucketCompetencia(torneo) {
       const t = norm(torneo || "");
-      if (t.includes("apertura 2007")) return "Apertura 2007";
-      if (t.includes("clausura 2008")) return "Clausura 2008";
-      if (t.includes("apertura 2008")) return "Apertura 2008";
-      if (t.includes("clausura 2009")) return "Clausura 2009";
-      if (t.includes("apertura 2009")) return "Apertura 2009";
-      if (t.includes("clausura 2010")) return "Clausura 2010";
-      if (t.includes("apertura 2010")) return "Apertura 2010";
-      if (t.includes("clausura 2011")) return "Clausura 2011";
+      if (t.includes("apertura 2007")) return "Apertura 2007/08";
+      if (t.includes("clausura 2008")) return "Clausura 2007/08";
+      if (t.includes("apertura 2008")) return "Apertura 2008/09";
+      if (t.includes("clausura 2009")) return "Clausura 2008/09";
+      if (t.includes("apertura 2009")) return "Apertura 2009/10";
+      if (t.includes("clausura 2010")) return "Clausura 2009/10";
+      if (t.includes("apertura 2010")) return "Apertura 2010/11";
+      if (t.includes("clausura 2011")) return "Clausura 2010/11";
       if (t.includes("campeonato 10-11")) return "Desempate Descenso 2011";
       if (t.includes("nacional b 11-12")) return "Campeonato B Nacional 2011/12";
       if (t.includes("copa argentina 2012")) return "Copa Argentina 2012";
@@ -215,7 +224,7 @@ function mostrarFutbolistas() {
       .split(/[,\/]/) // separa por coma o barra
       .map(p => p.trim())
       .filter(p => p.length > 0)
-      .map(p => `<img src="https://globopedia.github.io/Artids/Banderas/${encodeURIComponent(p)}.png" alt="${p}" title="${p}" style="height:30px; margin:4px;">`)
+      .map(p => `<img src="https://globopedia.github.io/Artids/Banderas/${encodeURIComponent(p)}.png" alt="${p}" title="${p}" class="bandera">`)
       .join("")
   : ""}
 </div>
