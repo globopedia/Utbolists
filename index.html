@@ -148,6 +148,7 @@
         posicion: (c.Posición ?? "").toString().trim(),
         fechanac: (c.FechaNacimiento?? "").toString().trim(),
         lugarnac: (c.LugarNacimiento?? "").toString().trim(),
+        pais: (c.País ?? c.Pais ?? "").toString().trim(),
         fechamuerte: (c.FechaMuerte ?? "").toString().trim(),
         lugarmuerte: (c.LugarMuerte ?? "").toString().trim(),
         peso: (c.Peso ?? "").toString().trim(),
@@ -207,7 +208,10 @@ function mostrarFutbolistas() {
       cont.innerHTML = `
         <div class="club-header">
       ${futbolista.foto1 ? `<img src="${futbolista.foto1}" alt="${futbolista.futbolista}" style="width:105px;height:140px;object-fit:cover;border-radius:8px;">` : ""}
-      <h2>${futbolista.futbolista}</h2>
+      <div style="text-align:center;">
+  <h2>${futbolista.futbolista}</h2>
+  ${futbolista.pais ? `<img src="https://globopedia.github.io/Artids/Banderas/${encodeURIComponent(futbolista.pais)}.png" alt="${futbolista.pais}" style="height:30px; margin-top:4px;">` : ""}
+</div>
     </div>
     <p><b>Nombre completo:</b> ${futbolista.nombre}</p>
     <p><b>Posición:</b> ${futbolista.posicion}</p>
