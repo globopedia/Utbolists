@@ -313,6 +313,7 @@ document.addEventListener("change", function(e) {
           bloqueHTML = `
             <div class="partido-card">
               ${getTorneoImage(p.Torneo)}
+              <div><b>${p.Fecha}</b></div>
               <img class="escudo-rival" src="${getEscudo(p.Club)}" alt="${p.Club}" />
               <div class="resultado2-box">${p.Resultado2}</div>
               <div class="resultado1-box">${p.Resultado1}</div>
@@ -330,6 +331,7 @@ document.addEventListener("change", function(e) {
           bloqueHTML = `
             <div class="partido-card">
               ${getTorneoImage(p.Torneo)}
+              <div><b>${p.Fecha}</b></div>
               <img class="escudo-huracan" src="${getEscudo('Huracán')}" alt="Huracán">
               <div class="resultado1-box">${p.Resultado1}</div>
               <div class="resultado2-box">${p.Resultado2}</div>
