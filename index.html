@@ -222,15 +222,18 @@ function mostrarFutbolistas() {
   ${renderEstadisticas(futbolista.futbolista)}
 </div>
       `;
-    }
-function renderEstadisticas(nombreFutbolista) {
+    }function renderEstadisticas(nombreFutbolista) {
+  // Filtramos sólo los partidos donde aparece el futbolista en la columna Huracán
   const delFutbolista = encuentros.filter(p => {
     const jugadores = (p.Huracán || "")
-      .split(/[,\.;\)]\s*/)      // separa por coma, punto, ; o )
+      .split(/[,\.;\)]\s*/)      // separa por coma, punto, ; o paréntesis
       .map(limpiarNombreJugador) // limpia "(48 " o espacios
       .filter(j => j.length > 0);
+
     return jugadores.some(f => norm(f) === norm(nombreFutbolista));
   });
+
+  // Agrupamos resultados por competencia (sin dividir por condición)
   const agg = {};
   for (const e of delFutbolista) {
     const comp = bucketCompetencia(e.Torneo);
@@ -241,6 +244,7 @@ function renderEstadisticas(nombreFutbolista) {
     }
   }
 
+  // Armamos HTML
   let html = "";
   for (const comp of ORDEN_COMPETENCIAS) {
     if (!agg[comp]) continue;
@@ -273,9 +277,9 @@ function renderEstadisticas(nombreFutbolista) {
       </div>
     `;
   }
+
   return html || "<p>Sin datos disponibles</p>";
 }
-    
 // --- Función auxiliar (mejorada) para limpiar nombres de jugadores ---
 function limpiarNombreJugador(s) {
   if (!s) return "";
