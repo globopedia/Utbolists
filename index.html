@@ -224,17 +224,13 @@ function mostrarFutbolistas() {
       `;
     }
 function renderEstadisticas(nombreFutbolista) {
-  const delFutbolista = encuentros.filter(p => 
-    norm(p.Huracán || "")
-      // separamos por coma, punto, ; o paréntesis de cierre
-      const jugadores = (p.Huracán || "")
-  .split(/[,\.;\)]\s*/)     // separa por coma / ; / . / ) (igual que antes)
-  .map(limpiarNombreJugador)
-  .filter(j => j.length > 0);
-      // comparamos contra el nombre del futbolista
-      .some(f => norm(f) === norm(nombreFutbolista))
-  );
-
+  const delFutbolista = encuentros.filter(p => {
+    const jugadores = (p.Huracán || "")
+      .split(/[,\.;\)]\s*/)      // separa por coma, punto, ; o )
+      .map(limpiarNombreJugador) // limpia "(48 " o espacios
+      .filter(j => j.length > 0);
+    return jugadores.some(f => norm(f) === norm(nombreFutbolista));
+  });
   const agg = {};
   for (const e of delFutbolista) {
     const comp = bucketCompetencia(e.Torneo);
