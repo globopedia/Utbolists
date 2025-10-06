@@ -244,12 +244,21 @@ function mostrarFutbolistas() {
 </div>
       `;
     }
+function limpiarNombreJugador(s) {
+  if (!s) return "";
+  return String(s)
+    .replace(/\u00A0/g, " ")               // NBSP → espacio
+    .replace(/^\s*\(?\d+\)?\s*/, "")       // quita "(48 " o "48)"
+    .replace(/[.,;:)\s]+$/, "")            // quita .,;:) al final
+    .replace(/^[\s(]+/, "")                // quita espacios o paréntesis al inicio
+    .trim();
+}
+    
 function renderEstadisticas(nombreFutbolista) {
   const delFutbolista = encuentros.filter(p => {
     const jugadores = (p.Huracán || "")
       .split(/[(),.;\/]\s*/)                             // cortamos por coma, punto y coma o punto
-      .map(j => j.replace(/^\(?\d*\)?/, "").trim()) // borra "(48", "48)" o similares al inicio
-      .map(j => j.replace(/\)$/, "").trim())        // borra ")" final si quedó colgado
+      .map(j => limpiarNombreJugador(j))
       .filter(j => j.length > 0);
 
     return jugadores.some(j => norm(j) === norm(nombreFutbolista));
