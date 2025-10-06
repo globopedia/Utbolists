@@ -159,7 +159,8 @@
         foto1: (c.Foto1 ?? "").toString().trim(),
         foto2: (c.Foto2 ?? "").toString().trim()
       }));
-        encuentros = Papa.parse(csvPartidos, { header:true, skipEmptyLines:true }).data.map(p => ({
+
+      encuentros = Papa.parse(csvPartidos, { header:true, skipEmptyLines:true }).data.map(p => ({
         Fecha: (p.Fecha ?? "").trim(),
         Técnico: (p.Técnico ?? "").trim(),
         Condición: (p.Condición ?? "").trim(),
@@ -222,18 +223,18 @@ function mostrarFutbolistas() {
   ${renderEstadisticas(futbolista.futbolista)}
 </div>
       `;
-    }function renderEstadisticas(nombreFutbolista) {
-  // Filtramos sólo los partidos donde aparece el futbolista en la columna Huracán
+    }
+function renderEstadisticas(nombreFutbolista) {
   const delFutbolista = encuentros.filter(p => {
     const jugadores = (p.Huracán || "")
-      .split(/[,\.;\)]\s*/)      // separa por coma, punto, ; o paréntesis
-      .map(limpiarNombreJugador) // limpia "(48 " o espacios
+      .split(/[,\.;]/)                             // cortamos por coma, punto y coma o punto
+      .map(j => j.replace(/^\(?\d*\)?/, "").trim()) // borra "(48", "48)" o similares al inicio
+      .map(j => j.replace(/\)$/, "").trim())        // borra ")" final si quedó colgado
       .filter(j => j.length > 0);
 
-    return jugadores.some(f => norm(f) === norm(nombreFutbolista));
+    return jugadores.some(j => norm(j) === norm(nombreFutbolista));
   });
 
-  // Agrupamos resultados por competencia (sin dividir por condición)
   const agg = {};
   for (const e of delFutbolista) {
     const comp = bucketCompetencia(e.Torneo);
@@ -244,15 +245,14 @@ function mostrarFutbolistas() {
     }
   }
 
-  // Armamos HTML
   let html = "";
   for (const comp of ORDEN_COMPETENCIAS) {
     if (!agg[comp]) continue;
+    let compHTML = "";
     const bucket = agg[comp];
     const tot = bucket.Victoria + bucket.Empate + bucket.Derrota;
     if (tot === 0) continue;
-
-    let bloque = "<ul>";
+    let bloque = `<ul>`;
     ["Victoria","Empate","Derrota"].forEach(tipo => {
       const cantidad = bucket[tipo];
       if (cantidad > 0) {
@@ -260,7 +260,9 @@ function mostrarFutbolistas() {
         bloque += `
           <li>
             <label>
-              <input type="checkbox" class="chkPartidos" data-comp="${comp}" data-sit="${tipo}" data-futbolista="${nombreFutbolista}">
+              <input type="checkbox" class="chkPartidos" 
+                data-comp="${comp}" data-sit="${tipo}" 
+                data-futbolista="${nombreFutbolista}">
               ${icono} ${tipo}s: ${cantidad}
             </label>
             <div class="partidos-lista" style="display:none; margin-left:20px;"></div>
@@ -269,92 +271,74 @@ function mostrarFutbolistas() {
       }
     });
     bloque += "</ul>";
+    compHTML += bloque;
 
-    html += `
-      <div class="stat-group">
-        <div class="stat-title">🏆 ${comp}</div>
-        ${bloque}
-      </div>
-    `;
+    if (compHTML) {
+      html += `
+        <div class="stat-group">
+          <div class="stat-title">🏆 ${comp}</div>
+          ${compHTML}
+        </div>
+      `;
+    }
   }
-
   return html || "<p>Sin datos disponibles</p>";
 }
-// --- Función auxiliar (mejorada) para limpiar nombres de jugadores ---
-function limpiarNombreJugador(s) {
-  if (!s) return "";
-  return String(s)
-    .replace(/\u00A0/g, " ")               // NBSP -> space
-    .replace(/^\s*\(?\d+\)?\s*/, "")       // quita "(48 " o "48 " al inicio
-    .replace(/\s*\)$/g, "")                // quita paréntesis de cierre sobrante
-    .replace(/^[\s,.;:]+|[\s,.;:]+$/g, "") // recorta signos/puntos/comas al inicio/fin
-    .trim();
-}
-
-// Manejador de checkboxes: muestra lista de partidos según el futbolista
+    // Manejador de checkboxes (muestra partidos por filtro)
 document.addEventListener("change", function(e) {
   if (!e.target.classList.contains("chkPartidos")) return;
-
   const contenedor = e.target.closest("li").querySelector(".partidos-lista");
   contenedor.innerHTML = "";
-
   if (e.target.checked) {
     const { comp, sit, futbolista } = e.target.dataset;
 
-    const partidos = encuentros.filter(p =>
-      bucketCompetencia(p.Torneo) === comp &&
-      cap(norm(p.Situación)) === sit &&
-      // verificar que el jugador esté en la columna Huracán
-      norm(p.Huracán || "")
-       norm(p.Huracán || "")
-  .split(/[,\.;\)]\s*/)
-  .map(limpiarNombreJugador)
-  .filter(j => j.length > 0)
-  .some(f => norm(f) === norm(futbolista))
-      );
+    // filtrar partidos del futbolista
+    const partidos = encuentros.filter(p => {
+      // el jugador aparece en la celda de Huracán
+      const jugadores = norm(p.Huracán || "")
+        .split(/[,\.;]/)   // solo corta por coma, punto y coma, o punto
+  .map(j => j.replace(/^\(?\d*\)?/, "").trim())  // borra "(48", ")" o "48)" inicial
+  .map(j => j.replace(/\)$/, "").trim())         // borra ")" final si queda colgado
+  .filter(j => j.length > 0);
+      return jugadores.some(j => norm(j) === norm(futbolista)) &&
+             bucketCompetencia(p.Torneo) === comp &&
+             cap(norm(p.Situación)) === sit;
+    });
 
     if (partidos.length) {
       partidos.forEach(p => {
         let bloqueHTML = "";
 
         if ((p.Condición || "").toLowerCase() === "visitante") {
-          // Huracán visitante → Rival primero
           bloqueHTML = `
             <div class="partido-card">
               ${getTorneoImage(p.Torneo)}
-              <div class="resultado-con-escudo">
-                <img class="escudo-rival" src="${getEscudo(p.Club)}" alt="${p.Club}" />
-                <div class="resultado2-box">${p.Resultado2}</div>
-                <div class="resultado1-box">${p.Resultado1}</div>
-                <img class="escudo-huracan" src="${getEscudo("Huracán")}" alt="Huracán">
-              </div>
-              <div style="margin-top:6px;"><b>${p.Torneo}</b></div>
+              <img class="escudo-rival" src="${getEscudo(p.Club)}" alt="${p.Club}" />
+              <div class="resultado2-box">${p.Resultado2}</div>
+              <div class="resultado1-box">${p.Resultado1}</div>
+              <img class="escudo-huracan" src="${getEscudo('Huracán')}" alt="Huracán">
+              <div><b>${p.Torneo}</b></div>
               <div><b>Estadio:</b> ${p.Estadio} - <b>Árbitro:</b> ${p.Árbitro}</div>
-              <div>${ p.Estadio && getEstadioImage(p.Estadio) ? `<img src="${getEstadioImage(p.Estadio)}" style="max-height:40px;">` : "" }</div>
               <div><b>${p.Club}:</b> ${p.Rival}</div>
               <div><b>Huracán:</b> ${p.Huracán}</div>
-                  ${ p.Foto ? `<div style="margin:6px 0;"><img src="${p.Foto}" alt="Incidencias" style="max-width:250px;border-radius:8px;"></div>` : "" }
-                  <div>${renderIncidencias(p.Incidencias)}</div>
+              ${ p.Foto ? `<div style="margin:6px 0;"><img src="${p.Foto}" style="max-width:250px;border-radius:8px;"></div>` : "" }
+              <div>${renderIncidencias(p.Incidencias)}</div>
             </div>
           `;
         } else {
-          // Huracán local/neutral → Huracán primero
           bloqueHTML = `
             <div class="partido-card">
               ${getTorneoImage(p.Torneo)}
-              <div class="resultado-con-escudo">
-                <img class="escudo-huracan" src="${getEscudo("Huracán")}" alt="Huracán">
-                <div class="resultado1-box">${p.Resultado1}</div>
-                <div class="resultado2-box">${p.Resultado2}</div>
-                <img class="escudo-rival" src="${getEscudo(p.Club)}" alt="${p.Club}" />
-              </div>
-              <div style="margin-top:6px;"><b>${p.Torneo}</b></div>
+              <img class="escudo-huracan" src="${getEscudo('Huracán')}" alt="Huracán">
+              <div class="resultado1-box">${p.Resultado1}</div>
+              <div class="resultado2-box">${p.Resultado2}</div>
+              <img class="escudo-rival" src="${getEscudo(p.Club)}" alt="${p.Club}" />
+              <div><b>${p.Torneo}</b></div>
               <div><b>Estadio:</b> ${p.Estadio} - <b>Árbitro:</b> ${p.Árbitro}</div>
-              <div>${ p.Estadio && getEstadioImage(p.Estadio) ? `<img src="${getEstadioImage(p.Estadio)}" style="max-height:40px;">` : "" }</div>
               <div><b>Huracán:</b> ${p.Huracán}</div>
-             <div><b>${p.Club}:</b> ${p.Rival}</div>
-                  ${ p.Foto ? `<div style="margin:6px 0;"><img src="${p.Foto}" alt="Incidencias" style="max-width:250px;border-radius:8px;"></div>` : "" }
-                  <div>${renderIncidencias(p.Incidencias)}</div>
+              <div><b>${p.Club}:</b> ${p.Rival}</div>
+              ${ p.Foto ? `<div style="margin:6px 0;"><img src="${p.Foto}" style="max-width:250px;border-radius:8px;"></div>` : "" }
+              <div>${renderIncidencias(p.Incidencias)}</div>
             </div>
           `;
         }
@@ -369,12 +353,12 @@ document.addEventListener("change", function(e) {
     } else {
       contenedor.innerHTML = "<i>No hay partidos registrados</i>";
     }
-
     contenedor.style.display = "block";
   } else {
     contenedor.style.display = "none";
   }
 });
+
     document.addEventListener("click", function(e) {
       if (e.target.classList.contains("acordeon-header")) {
         const body = e.target.nextElementSibling;
