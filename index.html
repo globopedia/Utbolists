@@ -332,6 +332,7 @@ document.addEventListener("change", function(e) {
               </div>
               <div style="margin-top:6px;"><b>${p.Torneo}</b></div>
               <div><b>Estadio:</b> ${p.Estadio} - <b>Árbitro:</b> ${p.Árbitro}</div>
+              <div>${ p.Estadio && getEstadioImage(p.Estadio) ? `<img src="${getEstadioImage(p.Estadio)}" style="max-height:40px;">` : "" }</div>
               <div><b>${p.Club}:</b> ${p.Rival}</div>
               <div><b>Huracán:</b> ${p.Huracán}</div>
                   ${ p.Foto ? `<div style="margin:6px 0;"><img src="${p.Foto}" alt="Incidencias" style="max-width:250px;border-radius:8px;"></div>` : "" }
@@ -351,6 +352,7 @@ document.addEventListener("change", function(e) {
               </div>
               <div style="margin-top:6px;"><b>${p.Torneo}</b></div>
               <div><b>Estadio:</b> ${p.Estadio} - <b>Árbitro:</b> ${p.Árbitro}</div>
+              <div>${ p.Estadio && getEstadioImage(p.Estadio) ? `<img src="${getEstadioImage(p.Estadio)}" style="max-height:40px;">` : "" }</div>
               <div><b>Huracán:</b> ${p.Huracán}</div>
              <div><b>${p.Club}:</b> ${p.Rival}</div>
                   ${ p.Foto ? `<div style="margin:6px 0;"><img src="${p.Foto}" alt="Incidencias" style="max-width:250px;border-radius:8px;"></div>` : "" }
