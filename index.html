@@ -284,11 +284,15 @@ function renderEstadisticas(nombreFutbolista) {
   }
   return html || "<p>Sin datos disponibles</p>";
 }
-    // --- Función auxiliar para limpiar nombres de jugadores ---
-function limpiarNombreJugador(j) {
-  return j
-    .replace(/^\(?\d*\)?/, "")   // quita "(48" o "48)"
-    .replace(/\)$/, "")          // quita ")" final
+    
+// --- Función auxiliar (mejorada) para limpiar nombres de jugadores ---
+function limpiarNombreJugador(s) {
+  if (!s) return "";
+  return String(s)
+    .replace(/\u00A0/g, " ")               // NBSP -> space
+    .replace(/^\s*\(?\d+\)?\s*/, "")       // quita "(48 " o "48 " al inicio
+    .replace(/\s*\)$/g, "")                // quita paréntesis de cierre sobrante
+    .replace(/^[\s,.;:]+|[\s,.;:]+$/g, "") // recorta signos/puntos/comas al inicio/fin
     .trim();
 }
 
