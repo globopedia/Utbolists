@@ -277,46 +277,36 @@ const jugadores = (p.Huracán || "")
     }
   }
 
-  let html = "";
-  for (const comp of ORDEN_COMPETENCIAS) {
-    if (!agg[comp]) continue;
-    let compHTML = "";
-    const bucket = agg[comp];
-    const tot = bucket.Victoria + bucket.Empate + bucket.Derrota;
-    if (tot === 0) continue;
-    let bloque = `<ul>`;
-    ["Victoria","Empate","Derrota"].forEach(tipo => {
-      const cantidad = bucket[tipo];
-      if (cantidad > 0) {
-        const icono = tipo==="Victoria"?"✅":tipo==="Empate"?"🤝":"❌";
-        bloque += `
-          <li>
-            <label>
-              <input type="checkbox" class="chkPartidos" 
-                data-comp="${comp}" data-sit="${tipo}" 
-                data-futbolista="${nombreFutbolista}">
-              ${icono} ${tipo}s: ${cantidad}
-            </label>
-            <div class="partidos-lista" style="display:none; margin-left:20px;"></div>
-          </li>
-        `;
-      }
-    });
-    bloque += "</ul>";
-    compHTML += bloque;
+let html = "";
+for (const comp of ORDEN_COMPETENCIAS) {
+  if (!agg[comp]) continue;
+  const bucket = agg[comp];
+  const total = bucket.Victoria + bucket.Empate + bucket.Derrota;
+  if (total === 0) continue;
 
-    if (compHTML) {
-      html += `
-        <div class="stat-group">
-          <div class="stat-title">🏆 ${comp}</div>
-          ${compHTML}
-        </div>
-      `;
-    }
-  }
-  return html || "<p>Sin datos disponibles</p>";
+  const resumen = `G${bucket.Victoria}-E${bucket.Empate}-P${bucket.Derrota}`;
+
+  html += `
+    <div class="stat-group">
+      <div class="stat-title">🏆 ${comp}</div>
+      <ul>
+        <li>
+          <label>
+            <input type="checkbox" class="chkPartidos"
+              data-comp="${comp}"
+              data-sit="todos"
+              data-futbolista="${nombreFutbolista}">
+            📊 ${total} partidos (${resumen})
+          </label>
+          <div class="partidos-lista" style="display:none; margin-left:20px;"></div>
+        </li>
+      </ul>
+    </div>
+  `;
 }
-    // Manejador de checkboxes (muestra partidos por filtro)
+return html || "<p>Sin datos disponibles</p>";
+  
+  // Manejador de checkboxes (muestra partidos por filtro)
 document.addEventListener("change", function(e) {
   if (!e.target.classList.contains("chkPartidos")) return;
   const contenedor = e.target.closest("li").querySelector(".partidos-lista");
@@ -337,7 +327,7 @@ const jugadores = (p.Huracán || "")
   .filter(j => j.length > 1);
       return jugadores.some(j => norm(j) === norm(futbolista)) &&
              bucketCompetencia(p.Torneo) === comp &&
-             cap(norm(p.Situación)) === sit;
+          (sit === "todos" || cap(norm(p.Situación)) === sit);
     });
 
     if (partidos.length) {
