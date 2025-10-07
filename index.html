@@ -62,7 +62,8 @@
 
     let tecnicos = [];
     let encuentros = [];
-
+    let mapaTecnicos = new Map();
+    
     const norm = (t) => (t || "").toString().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase();
     const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : s;
 
@@ -196,7 +197,7 @@ Promise.all([
       }));
 
 // Mapa de técnico → ID (para poder mostrar solo el apellido)
-        const mapaTecnicos = new Map(tecnicos.map(t => [t.tecnico, t.id]));
+        mapaTecnicos = new Map(tecnicos.map(t => [t.tecnico, t.id]));
   
       llenarSelectFutbolistas();
     });
