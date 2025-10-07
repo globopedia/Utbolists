@@ -256,12 +256,14 @@ function limpiarNombreJugador(s) {
     
 function renderEstadisticas(nombreFutbolista) {
   const delFutbolista = encuentros.filter(p => {
- const jugadores = (p.Huracán || "")
-  .replace(/\(\d+\s*/g, "")      // quita "(46 ", "(75 ", etc.
-  .replace(/\)/g, "")            // quita paréntesis sueltos
-  .split(/[.,;)(\"\']*\s*/g)     // separa por .,; ) " ' y espacios
+const jugadores = (p.Huracán || "")
+  // limpia numeraciones tipo "(46 " o "75)"
+  .replace(/\(\d+\s*/g, "")
+  .replace(/\)/g, "")
+  // divide por separadores reales de nombres, sin romper abreviaturas ni iniciales
+  .split(/\s*[;,]\s*|\.\s*|"\s*/g)
   .map(j => j.trim())
-  .filter(j => j.length > 0);
+  .filter(j => j.length > 1);
     return jugadores.some(j => norm(j) === norm(nombreFutbolista));
   });
 
@@ -326,11 +328,13 @@ document.addEventListener("change", function(e) {
     const partidos = encuentros.filter(p => {
       // el jugador aparece en la celda de Huracán
 const jugadores = (p.Huracán || "")
-  .replace(/\(\d+\s*/g, "")      // quita "(46 ", "(75 ", etc.
-  .replace(/\)/g, "")            // quita paréntesis sueltos
-  .split(/[.,;)(\"\']*\s*/g)     // separa por .,; ) " ' y espacios
+  // limpia numeraciones tipo "(46 " o "75)"
+  .replace(/\(\d+\s*/g, "")
+  .replace(/\)/g, "")
+  // divide por separadores reales de nombres, sin romper abreviaturas ni iniciales
+  .split(/\s*[;,]\s*|\.\s*|"\s*/g)
   .map(j => j.trim())
-  .filter(j => j.length > 0);
+  .filter(j => j.length > 1);
       return jugadores.some(j => norm(j) === norm(futbolista)) &&
              bucketCompetencia(p.Torneo) === comp &&
              cap(norm(p.Situación)) === sit;
