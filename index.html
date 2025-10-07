@@ -221,7 +221,7 @@ function mostrarFutbolistas() {
   <h2>${futbolista.futbolista}</h2>
   ${futbolista.pais
   ? futbolista.pais
-      .split(/[(),.;\/]\s*/) // separa por coma o barra
+      .split(/["']?\s*[(),.;\/]+\s*["']?/) // separa por coma o barra
       .map(p => p.trim())
       .filter(p => p.length > 0)
       .map(p => `<img src="https://globopedia.github.io/Artids/Banderas/${encodeURIComponent(p)}.png" alt="${p}" title="${p}" class="bandera">`)
@@ -257,7 +257,7 @@ function limpiarNombreJugador(s) {
 function renderEstadisticas(nombreFutbolista) {
   const delFutbolista = encuentros.filter(p => {
     const jugadores = (p.Huracán || "")
-      .split(/[(),.;\/]\s*/)                             // cortamos por coma, punto y coma o punto
+      .split(/["']?\s*[(),.;\/]+\s*["']?/)                             // cortamos por coma, punto y coma o punto
       .map(j => limpiarNombreJugador(j))
       .filter(j => j.length > 0);
 
@@ -325,7 +325,7 @@ document.addEventListener("change", function(e) {
     const partidos = encuentros.filter(p => {
       // el jugador aparece en la celda de Huracán
       const jugadores = norm(p.Huracán || "")
-        .split(/[(),.;\/]\s*/)   // solo corta por coma, punto y coma, o punto
+        .split(/["']?\s*[(),.;\/]+\s*["']?/)   // solo corta por coma, punto y coma, o punto
   .map(j => j.replace(/^\(?\d*\)?/, "").trim())  // borra "(48", ")" o "48)" inicial
   .map(j => j.replace(/\)$/, "").trim())         // borra ")" final si queda colgado
   .filter(j => j.length > 0);
