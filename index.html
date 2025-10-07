@@ -144,11 +144,14 @@
       return "Otros";
     }
 
-    Promise.all([
-      fetch(futbolistasURL).then(r => r.text()),
-      fetch(partidosURL).then(r => r.text())
-    ])
-    .then(([csvFutbolistas, csvPartidos]) => {
+  const tecnicosURL = "https://globopedia.github.io/Etnics/Etnics.csv?v=" + Date.now();
+
+Promise.all([
+  fetch(futbolistasURL).then(r => r.text()),
+  fetch(partidosURL).then(r => r.text()),
+  fetch(tecnicosURL).then(r => r.text())
+])
+.then(([csvFutbolistas, csvPartidos, csvTecnicos]) => {
     futbolistas = Papa.parse(csvFutbolistas, { header: true, skipEmptyLines: true }).data.map(c => ({
         id: (c.ID ?? "").toString().trim(),
         futbolista: (c["Futbolista"] ?? "").toString().trim(),
@@ -187,6 +190,14 @@
         Incidencias: (p.Incidencias ?? "").trim()
       }));
 
+        tecnicos = Papa.parse(csvTecnicos, { header: true, skipEmptyLines: true }).data.map(t => ({
+        id: (t.ID ?? "").trim(),
+        tecnico: (t.Técnico ?? t.Nombre ?? "").trim()
+      }));
+
+// Mapa de técnico → ID (para poder mostrar solo el apellido)
+        const mapaTecnicos = new Map(tecnicos.map(t => [t.tecnico, t.id]));
+  
       llenarSelectFutbolistas();
     });
 
@@ -378,7 +389,7 @@ const jugadores = (p.Huracán || "")
   ${p.Resultado1}-${p.Resultado2}
   <img src="${getEscudo(p.Club)}" alt="${p.Club}" title="${p.Club}"
        style="height:22px; vertical-align:middle; margin:0 6px;">
-  [${p.Técnico}]
+  [${mapaTecnicos.get(p.Técnico) || p.Técnico}]
 </div>
             <div class="acordeon-body cerrado">${bloqueHTML}</div>
           </div>
