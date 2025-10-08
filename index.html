@@ -223,7 +223,7 @@ function mostrarFutbolistas() {
   <h2>${futbolista.futbolista}</h2>
   ${futbolista.pais
   ? futbolista.pais
-     .split(/[(),.;\/]|(?:\s*y\s*)|(?:\(\d+\s*)|(?:\s*\d+\))/)
+   .split(/[,.;\/]|(?<=\))\s*|(?:\sy\s+)/)
       .map(p => p.trim())
       .filter(p => p.length > 0)
       .map(p => `<img src="https://globopedia.github.io/Artids/Banderas/${encodeURIComponent(p)}.png" alt="${p}" title="${p}" class="bandera">`)
@@ -273,7 +273,7 @@ if (p.Huracán && p.Huracán.includes("Pastore")) {
 
     const jugadores = textoLimpio
       // 🔹 Separa por comas, puntos, paréntesis, barras o la palabra " y "
-      .split(/[.,;\/\(\)]|\sy\s/)
+     .split(/[,.;\/]|(?<=\))\s*|(?:\sy\s+)/)
       .map(j => j.trim())
       .filter(j => j.length > 1);
 
@@ -336,7 +336,7 @@ const jugadores = (p.Huracán || "")
   .replace(/\(\d+\s*/g, "")
   .replace(/\)/g, "")
   // divide por separadores reales de nombres, sin romper abreviaturas ni iniciales
- .split(/[(),.;\/]|(?:\s*y\s*)|(?:\(\d+\s*)|(?:\s*\d+\))/)
+.split(/[,.;\/]|(?<=\))\s*|(?:\sy\s+)/)
   .map(j => j.trim())
   .filter(j => j.length > 1);
       return jugadores.some(j => norm(j) === norm(futbolista)) &&
