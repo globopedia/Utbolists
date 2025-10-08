@@ -258,14 +258,21 @@ function limpiarNombreJugador(s) {
     
 function renderEstadisticas(nombreFutbolista) {
   const delFutbolista = encuentros.filter(p => {
-const jugadores = (p.Huracán || "")
-  // limpia numeraciones tipo "(46 " o "75)"
-  .replace(/\(\d+\s*/g, "")
-  .replace(/\)/g, "")
-  // divide por separadores reales de nombres, sin romper abreviaturas ni iniciales
- .split(/[(),.;\/]|(?:\s*y\s*)|(?:\(\d+\s*)|(?:\s*\d+\))/)
-  .map(j => j.trim())
-  .filter(j => j.length > 1);
+    const textoLimpio = (p.Huracán || "")
+      // 🔹 Elimina cosas como "(85", "90)", "46 ", etc.
+      .replace(/\(\d+\s*/g, "")
+      .replace(/\s*\d+\)/g, "")
+      .replace(/\d+\s*/g, "")
+      .replace(/\)/g, "")
+      .replace(/\(\s*/g, "");
+
+    const jugadores = textoLimpio
+      // 🔹 Separa por comas, puntos, paréntesis, barras o la palabra " y "
+      .split(/[.,;\/\(\)]|\sy\s/)
+      .map(j => j.trim())
+      .filter(j => j.length > 1);
+
+    // 🔹 Compara con el nombre normalizado
     return jugadores.some(j => norm(j) === norm(nombreFutbolista));
   });
 
