@@ -258,6 +258,11 @@ function limpiarNombreJugador(s) {
     
 function renderEstadisticas(nombreFutbolista) {
   const delFutbolista = encuentros.filter(p => {
+// --- DEBUG: revisar si PapaParse corta las filas ---
+if (p.Huracán && p.Huracán.includes("Pastore")) {
+  console.log(">>> Longitud:", p.Huracán.length);
+  console.log(">>> Fragmento:", p.Huracán.slice(0, 400));
+}
     const textoLimpio = (p.Huracán || "")
       // 🔹 Elimina cosas como "(85", "90)", "46 ", etc.
       .replace(/\(\d+\s*/g, "")
