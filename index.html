@@ -267,17 +267,23 @@ function limpiarNombreJugador(s) {
 function renderEstadisticas(nombreFutbolista) {
   const delFutbolista = encuentros.filter(p => {
 const jugadores = (p.Huracán || "")
-  // elimina numeraciones tipo "(48 " o "(75)" sin tocar los nombres
-  .replace(/\(\s*\d+\s*\)/g, "")
-  .replace(/\(\s*\d+\s*/g, "")
-  .replace(/\s*\d+\s*\)/g, "")
-  // reemplaza paréntesis de nombres solo si NO son parte de letras
-  .replace(/[\(\)]/g, "")
-  // divide por comas, puntos y punto y coma, pero no rompe nombres con espacio
-  .split(/[,;\/]+/)
-  .map(j => j.trim())
+  // 1. Reemplaza " (" por coma para separar correctamente los ingresos
+  .replace(/ \(/g, ",")
+  // 2. Elimina todos los números
+  .replace(/\d+/g, "")
+  // 3. Elimina paréntesis de cierre simples o dobles
+  .replace(/\)+/g, "")
+  // 4. Limpia dobles comas y espacios innecesarios
+  .replace(/,,+/g, ",")
+  .replace(/\s+,/g, ",")
+  .replace(/,\s+/g, ",")
+  .replace(/\s+/g, " ")
+  // 5. Divide por comas o punto y coma
+  .split(/[,;]+/)
+  // 6. Quita espacios en exceso y paréntesis sueltos
+  .map(j => j.replace(/^[()\s]+|[()\s]+$/g, "").trim())
   .filter(j => j.length > 1);
-    return jugadores.some(j => norm(j) === norm(nombreFutbolista));
+  return jugadores.some(j => norm(j) === norm(nombreFutbolista));
   });
 
   const agg = {};
