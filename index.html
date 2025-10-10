@@ -337,12 +337,21 @@ document.addEventListener("change", function(e) {
     const partidos = encuentros.filter(p => {
       // el jugador aparece en la celda de Huracán
 const jugadores = (p.Huracán || "")
-  // limpia numeraciones tipo "(46 " o "75)"
-  .replace(/\(\d+\s*/g, "")
-  .replace(/\)/g, "")
-  // divide por separadores reales de nombres, sin romper abreviaturas ni iniciales
-  .split(/[\(\),.;\/]|(?:\)\s*)|(?:\s*\()|(?:\s*y\s*)|(?:\s*\d+\s*)/)
-  .map(j => j.trim())
+  // 1. Reemplaza " (" por coma para separar correctamente los ingresos
+  .replace(/ \(/g, ",")
+  // 2. Elimina todos los números
+  .replace(/\d+/g, "")
+  // 3. Elimina paréntesis de cierre simples o dobles
+  .replace(/\)+/g, "")
+  // 4. Limpia dobles comas y espacios innecesarios
+  .replace(/,,+/g, ",")
+  .replace(/\s+,/g, ",")
+  .replace(/,\s+/g, ",")
+  .replace(/\s+/g, " ")
+  // 5. Divide por comas o punto y coma
+  .split(/[,;]+/)
+  // 6. Quita espacios en exceso y paréntesis sueltos
+  .map(j => j.replace(/^[()\s]+|[()\s]+$/g, "").trim())
   .filter(j => j.length > 1);
       return jugadores.some(j => norm(j) === norm(futbolista)) &&
              bucketCompetencia(p.Torneo) === comp &&
