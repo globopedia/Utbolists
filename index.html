@@ -66,7 +66,7 @@
     const norm = (t) => (t || "").toString().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase();
     const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : s;
 
-    const ORDEN_COMPETENCIAS = ["Gira por México 2007", "Apertura 2007/08","Copa CAFAM 2008", "Clausura 2007/08","Apertura 2008/09","Clausura 2008/09","Apertura 2009/10","Clausura 2009/10","Apertura 2010/11",
+    const ORDEN_COMPETENCIAS = ["Apertura 2007/08","Clausura 2007/08","Apertura 2008/09","Clausura 2008/09","Apertura 2009/10","Clausura 2009/10","Apertura 2010/11",
 "Clausura 2010/11","Desempate Descenso 2011","Campeonato B Nacional 2011/12","Copa Argentina 2012",
 "Campeonato B Nacional 2012/13","Copa Argentina 2013","Campeonato B Nacional 2013/14","Desempate 3° Puesto BN 2013/14","Copa Argentina 2014",
 "Desempate 3° Puesto NB 2013/14","Campeonato B Nacional 2014","Desempate 5° Puesto NB 2014",
@@ -77,16 +77,14 @@
 "Copa Maradona 2020","Copa-LPF 2021","Copa Argentina 2020","Torneo-LPF 2021","Copa-LPF 2022",
 "Copa Argentina 2022","Torneo-LPF 2022","Torneo-LPF 2023","Copa Argentina 2023","Copa Libertadores 2023",
 "Copa Sudamericana 2023","Copa-LPF 2023","Copa-LPF 2024","Copa Argentina 2024","Torneo-LPF 2024",
-"Apertura-LPF 2025","Copa Argentina 2025","Copa Sudamericana 2025","Clausura-LPF 2025","Otros"];
+"Apertura-LPF 2025","Copa Argentina 2025","Copa Sudamericana 2025","Clausura-LPF 2025","Amistosos","Otros"];
     const CONDICIONES = ["Local","Neutral","Visitante"];
     const SITUACIONES = ["Victoria","Empate","Derrota"];
 
     function bucketCompetencia(torneo) {
       const t = norm(torneo || "");
-      if (t.includes("mexico 2007")) return "Gira por México 2007";
       if (t.includes("apertura 2007")) return "Apertura 2007/08";
       if (t.includes("clausura 2008")) return "Clausura 2007/08";
-      if (t.includes("cafam 2008")) return "Copa CAFAM 2008";
       if (t.includes("apertura 2008")) return "Apertura 2008/09";
       if (t.includes("clausura 2009")) return "Clausura 2008/09";
       if (t.includes("apertura 2009")) return "Apertura 2009/10";
@@ -172,27 +170,23 @@
         foto2: (c.Foto2 ?? "").toString().trim()
       }));
 
-encuentros = Papa.parse(csvPartidos, {
-  header: true,
-  skipEmptyLines: true,
-  quoteChar: '',     // no trata comillas como delimitador
-  escapeChar: '',    // no escapa caracteres
-}).data.map(p => ({
-  Fecha: (p.Fecha ?? "").trim(),
-  Técnico: (p.Técnico ?? "").trim(),
-  Condición: (p.Condición ?? "").trim(),
-  Situación: (p.Situación ?? "").trim(),
-  Resultado1: (p.Resultado1 ?? "").trim(),
-  Resultado2: (p.Resultado2 ?? "").trim(),
-  Club: (p.Club ?? "").trim(),
-  Torneo: (p.Torneo ?? "").trim(),
-  Estadio: (p.Estadio ?? "").trim(),
-  Árbitro: (p.Árbitro ?? "").trim(),
-  Huracán: (p.Huracán ?? "").trim(),
-  Rival: (p.Rival ?? "").trim(),
-  Foto: (p.Foto ?? "").trim(),
-  Incidencias: (p.Incidencias ?? "").trim()
-}));
+      encuentros = Papa.parse(csvPartidos, { header:true, skipEmptyLines:true }).data.map(p => ({
+        Fecha: (p.Fecha ?? "").trim(),
+        Técnico: (p.Técnico ?? "").trim(),
+        Condición: (p.Condición ?? "").trim(),
+        Situación: (p.Situación ?? "").trim(),
+        Resultado1: (p.Resultado1 ?? "").trim(),
+        Resultado2: (p.Resultado2 ?? "").trim(),
+        Club: (p.Club ?? "").trim(),
+        Torneo: (p.Torneo ?? "").trim(),
+        Estadio: (p.Estadio ?? "").trim(),
+        Árbitro: (p.Árbitro ?? "").trim(),
+        Huracán: (p.Huracán ?? "").trim(),
+        Rival: (p.Rival ?? "").trim(),
+        Foto: (p.Foto ?? "").trim(),
+        Incidencias: (p.Incidencias ?? "").trim()
+      }));
+
       llenarSelectFutbolistas();
     });
 
@@ -227,7 +221,7 @@ function mostrarFutbolistas() {
   <h2>${futbolista.futbolista}</h2>
   ${futbolista.pais
   ? futbolista.pais
-   .split(/[,.;\/]|(?<=\))\s*|(?:\sy\s+)/)
+      .split(/[\(\),.;\/]|(?:\)\s*)|(?:\s*\()|(?:\s*y\s*)|(?:\s*\d+\s*)/)
       .map(p => p.trim())
       .filter(p => p.length > 0)
       .map(p => `<img src="https://globopedia.github.io/Artids/Banderas/${encodeURIComponent(p)}.png" alt="${p}" title="${p}" class="bandera">`)
@@ -262,46 +256,14 @@ function limpiarNombreJugador(s) {
     
 function renderEstadisticas(nombreFutbolista) {
   const delFutbolista = encuentros.filter(p => {
-  const texto = (p.Huracán || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-
-  // --- TESTEO: descomponemos nombres reales ---
-  if (norm(nombreFutbolista).includes("kato") || norm(nombreFutbolista).includes("pastore")) {
-    console.log(">>>>", nombreFutbolista, "| Texto:", texto.slice(0, 200));
-  }
-
-  const jugadores = texto
-    // limpia cosas tipo (46 Matías Defederico)
-    .replace(/\(\d+\s*/g, "")
-    .replace(/\d+\)/g, "")
-    .replace(/\)/g, "")
-    .replace(/\(\s*/g, "")
-    // divide por separadores: coma, punto y coma, punto, barra, “ y ”
-    .split(/[,.;\/]|(?:\sy\s+)/)
-    .map(j => j.trim())
-    .filter(j => j.length > 1);
-
-  return jugadores.some(j => norm(j) === norm(nombreFutbolista));
-});
-
-let textoLimpio = (p.Huracán || "")
-  // elimina números entre paréntesis o sueltos tipo "(46 ", "90)" o " 15 "
-  .replace(/\(\d+\s*\)/g, " ")
-  .replace(/\(\d+\s*/g, " ")
-  .replace(/\s*\d+\)/g, " ")
-  .replace(/\b\d+\b/g, " ")
-  // limpia paréntesis abiertos/cerrados sobrantes
-  .replace(/[()]/g, " ")
-  // reemplaza dobles espacios por uno solo
-  .replace(/\s{2,}/g, " ")
-  .trim();
-
-const jugadores = textoLimpio
-  // separa por comas, puntos, punto y coma, barra o la conjunción " y "
-  .split(/[,.;\/]|(?:\sy\s+)/)
+const jugadores = (p.Huracán || "")
+  // limpia numeraciones tipo "(46 " o "75)"
+  .replace(/\(\d+\s*/g, "")
+  .replace(/\)/g, "")
+  // divide por separadores reales de nombres, sin romper abreviaturas ni iniciales
+  .split(/[\(\),.;\/]|(?:\)\s*)|(?:\s*\()|(?:\s*y\s*)|(?:\s*\d+\s*)/)
   .map(j => j.trim())
   .filter(j => j.length > 1);
-
-    // 🔹 Compara con el nombre normalizado
     return jugadores.some(j => norm(j) === norm(nombreFutbolista));
   });
 
@@ -360,7 +322,7 @@ const jugadores = (p.Huracán || "")
   .replace(/\(\d+\s*/g, "")
   .replace(/\)/g, "")
   // divide por separadores reales de nombres, sin romper abreviaturas ni iniciales
-.split(/[,.;\/]|(?<=\))\s*|(?:\sy\s+)/)
+  .split(/[\(\),.;\/]|(?:\)\s*)|(?:\s*\()|(?:\s*y\s*)|(?:\s*\d+\s*)/)
   .map(j => j.trim())
   .filter(j => j.length > 1);
       return jugadores.some(j => norm(j) === norm(futbolista)) &&
