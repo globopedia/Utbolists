@@ -262,11 +262,27 @@ function limpiarNombreJugador(s) {
     
 function renderEstadisticas(nombreFutbolista) {
   const delFutbolista = encuentros.filter(p => {
-// --- DEBUG: revisar si PapaParse corta las filas ---
-if (p.Huracán && p.Huracán.includes("Pastore")) {
-  console.log(">>> Longitud:", p.Huracán.length);
-  console.log(">>> Fragmento:", p.Huracán.slice(0, 400));
-}
+  const texto = (p.Huracán || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+  // --- TESTEO: descomponemos nombres reales ---
+  if (norm(nombreFutbolista).includes("kato") || norm(nombreFutbolista).includes("pastore")) {
+    console.log(">>>>", nombreFutbolista, "| Texto:", texto.slice(0, 200));
+  }
+
+  const jugadores = texto
+    // limpia cosas tipo (46 Matías Defederico)
+    .replace(/\(\d+\s*/g, "")
+    .replace(/\d+\)/g, "")
+    .replace(/\)/g, "")
+    .replace(/\(\s*/g, "")
+    // divide por separadores: coma, punto y coma, punto, barra, “ y ”
+    .split(/[,.;\/]|(?:\sy\s+)/)
+    .map(j => j.trim())
+    .filter(j => j.length > 1);
+
+  return jugadores.some(j => norm(j) === norm(nombreFutbolista));
+});
+
 let textoLimpio = (p.Huracán || "")
   // elimina números entre paréntesis o sueltos tipo "(46 ", "90)" o " 15 "
   .replace(/\(\d+\s*\)/g, " ")
