@@ -263,19 +263,30 @@ if (p.Huracán && p.Huracán.includes("Pastore")) {
   console.log(">>> Longitud:", p.Huracán.length);
   console.log(">>> Fragmento:", p.Huracán.slice(0, 400));
 }
-    const textoLimpio = (p.Huracán || "")
-      // 🔹 Elimina cosas como "(85", "90)", "46 ", etc.
-      .replace(/\(\d+\s*/g, "")
-      .replace(/\s*\d+\)/g, "")
-      .replace(/\d+\s*/g, "")
-      .replace(/\)/g, "")
-      .replace(/\(\s*/g, "");
+    let textoLimpio = (p.Huracán || "");
+
+// --- protección contra cortes de línea o errores de comillas ---
+if (textoLimpio.includes('"') && !textoLimpio.trim().endsWith('"')) {
+  textoLimpio = textoLimpio.replace(/"$/, '');
+}
+
+// --- limpieza más amplia ---
+textoLimpio = textoLimpio
+  .replace(/\u00A0/g, " ")            // NBSP
+  .replace(/\(\d+\s*/g, "")           // "(46 "
+  .replace(/\s*\d+\)/g, "")           // "90)"
+  .replace(/\d+\s*/g, "")             // "85 "
+  .replace(/\s+y\s+/gi, ",")          // convierte " y " en coma
+  .replace(/[.;:]+/g, ",")            // puntos y comas → comas
+  .replace(/\s*\)\s*/g, ",")          // cierra paréntesis → coma
+  .replace(/\(\s*/g, ",")             // abre paréntesis → coma
+  .replace(/,+/g, ",")                // colapsa comas repetidas
+  .trim();
 
     const jugadores = textoLimpio
-      // 🔹 Separa por comas, puntos, paréntesis, barras o la palabra " y "
-     .split(/[,.;\/]|(?<=\))\s*|(?:\sy\s+)/)
-      .map(j => j.trim())
-      .filter(j => j.length > 1);
+  .split(/[,/]/) // ya todo se convirtió a comas o barras
+  .map(j => j.trim())
+  .filter(j => j.length > 1);
 
     // 🔹 Compara con el nombre normalizado
     return jugadores.some(j => norm(j) === norm(nombreFutbolista));
