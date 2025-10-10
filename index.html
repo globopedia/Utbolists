@@ -172,23 +172,27 @@
         foto2: (c.Foto2 ?? "").toString().trim()
       }));
 
-      encuentros = Papa.parse(csvPartidos, { header:true, skipEmptyLines:true }).data.map(p => ({
-        Fecha: (p.Fecha ?? "").trim(),
-        Técnico: (p.Técnico ?? "").trim(),
-        Condición: (p.Condición ?? "").trim(),
-        Situación: (p.Situación ?? "").trim(),
-        Resultado1: (p.Resultado1 ?? "").trim(),
-        Resultado2: (p.Resultado2 ?? "").trim(),
-        Club: (p.Club ?? "").trim(),
-        Torneo: (p.Torneo ?? "").trim(),
-        Estadio: (p.Estadio ?? "").trim(),
-        Árbitro: (p.Árbitro ?? "").trim(),
-        Huracán: (p.Huracán ?? "").trim(),
-        Rival: (p.Rival ?? "").trim(),
-        Foto: (p.Foto ?? "").trim(),
-        Incidencias: (p.Incidencias ?? "").trim()
-      }));
-
+encuentros = Papa.parse(csvPartidos, {
+  header: true,
+  skipEmptyLines: true,
+  quoteChar: '',     // no trata comillas como delimitador
+  escapeChar: '',    // no escapa caracteres
+}).data.map(p => ({
+  Fecha: (p.Fecha ?? "").trim(),
+  Técnico: (p.Técnico ?? "").trim(),
+  Condición: (p.Condición ?? "").trim(),
+  Situación: (p.Situación ?? "").trim(),
+  Resultado1: (p.Resultado1 ?? "").trim(),
+  Resultado2: (p.Resultado2 ?? "").trim(),
+  Club: (p.Club ?? "").trim(),
+  Torneo: (p.Torneo ?? "").trim(),
+  Estadio: (p.Estadio ?? "").trim(),
+  Árbitro: (p.Árbitro ?? "").trim(),
+  Huracán: (p.Huracán ?? "").trim(),
+  Rival: (p.Rival ?? "").trim(),
+  Foto: (p.Foto ?? "").trim(),
+  Incidencias: (p.Incidencias ?? "").trim()
+}));
       llenarSelectFutbolistas();
     });
 
