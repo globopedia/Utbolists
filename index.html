@@ -273,15 +273,18 @@ const jugadores = (p.Huracán || "")
   .replace(/\d+/g, "")
   // 3. Elimina paréntesis de cierre simples o dobles
   .replace(/\)+/g, "")
-  // 4. Limpia dobles comas y espacios innecesarios
+  // 4. Reemplaza el conector " y " (o variantes con espacios extra) por coma
+  .replace(/\s+y\s+/gi, ",")
+  // 5. Limpia dobles comas y espacios innecesarios
   .replace(/,,+/g, ",")
   .replace(/\s+,/g, ",")
   .replace(/,\s+/g, ",")
   .replace(/\s+/g, " ")
-  // 5. Divide por comas o punto y coma
+  // 6. Divide por comas o punto y coma
   .split(/[,;]+/)
-  // 6. Quita espacios en exceso y paréntesis sueltos
+  // 7. Quita paréntesis o espacios residuales
   .map(j => j.replace(/^[()\s]+|[()\s]+$/g, "").trim())
+  // 8. Filtra vacíos o elementos cortos
   .filter(j => j.length > 1);
   return jugadores.some(j => norm(j) === norm(nombreFutbolista));
   });
@@ -343,15 +346,18 @@ const jugadores = (p.Huracán || "")
   .replace(/\d+/g, "")
   // 3. Elimina paréntesis de cierre simples o dobles
   .replace(/\)+/g, "")
-  // 4. Limpia dobles comas y espacios innecesarios
+  // 4. Reemplaza el conector " y " (o variantes con espacios extra) por coma
+  .replace(/\s+y\s+/gi, ",")
+  // 5. Limpia dobles comas y espacios innecesarios
   .replace(/,,+/g, ",")
   .replace(/\s+,/g, ",")
   .replace(/,\s+/g, ",")
   .replace(/\s+/g, " ")
-  // 5. Divide por comas o punto y coma
+  // 6. Divide por comas o punto y coma
   .split(/[,;]+/)
-  // 6. Quita espacios en exceso y paréntesis sueltos
+  // 7. Quita paréntesis o espacios residuales
   .map(j => j.replace(/^[()\s]+|[()\s]+$/g, "").trim())
+  // 8. Filtra vacíos o elementos cortos
   .filter(j => j.length > 1);
       return jugadores.some(j => norm(j) === norm(futbolista)) &&
              bucketCompetencia(p.Torneo) === comp &&
