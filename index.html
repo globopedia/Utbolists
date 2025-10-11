@@ -318,7 +318,7 @@ for (const comp of ORDEN_COMPETENCIAS) {
               data-comp="${comp}"
               data-sit="todos"
               data-futbolista="${nombreFutbolista}">
-            📊 ${total} partidos (${resumen})
+            📊 ${total} ${total === 1 ? "partido" : "partidos"} (${resumen})
           </label>
           <div class="partidos-lista" style="display:none; margin-left:20px;"></div>
         </li>
