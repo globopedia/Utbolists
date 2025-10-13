@@ -495,8 +495,7 @@ function getEscudoClub(nombreClub) {
     .normalize("NFD")                    // elimina tildes
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/ñ/g, "n")                  // convierte ñ en n
-    .replace(/[()"]/g, "")              // saca paréntesis y comillas
-    .replace(/\s+/g, " ")               // normaliza espacios
+    .replace(/["]/g, "")              // saca comillas
     .trim();
   return `https://globopedia.github.io/Artids/Escudos/${fileName}.png`;
 }
