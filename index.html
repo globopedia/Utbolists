@@ -236,7 +236,10 @@ function mostrarFutbolistas() {
       .map(p => `<img src="https://globopedia.github.io/Artids/Banderas/${encodeURIComponent(p)}.png" alt="${p}" title="${p}" class="bandera">`)
       .join("")
   : ""}
-</div>
+ <div class="trayectoria-escudos">
+    ${renderTrayectoriaEscudos(futbolista.trayectoria)}
+  </div>
+  </div>
     </div>
     <p><b>Nombre:</b> ${futbolista.nombre}</p>
     <p><b>Posición:</b> ${futbolista.posicion}</p>
@@ -486,7 +489,29 @@ const jugadores = (p.Huracán || "")
       return "";
     }
 
-function InvertirNombre(nombre) {
+  function getEscudoClub(nombreClub) {
+  if (!nombreClub) return "";
+  // Normalizar el nombre (por si tiene acentos o mayúsculas)
+  const club = nombreClub.normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+  const url = `Escudos/${club}.png`;
+  return url;
+}
+    
+   function renderTrayectoriaEscudos(trayectoria) {
+  if (!trayectoria) return "";
+
+  // Separar por coma o punto y coma si usás eso
+  const clubes = trayectoria.split(",").map(c => c.trim()).filter(Boolean);
+
+  return clubes.map(club => {
+    const src = getEscudoClub(club);
+    return `<img src="${src}" alt="${club}" title="${club}" style="height:30px; margin: 5px;">`;
+  }).join("");
+}
+  
+  function InvertirNombre(nombre) {
   const partes = nombre.trim().split(" ");
   if (partes.length < 2) return nombre;
 
