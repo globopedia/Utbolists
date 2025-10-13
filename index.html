@@ -491,13 +491,12 @@ const jugadores = (p.Huracán || "")
 
 function getEscudoClub(nombreClub) {
   if (!nombreClub) return "";
-  const fileName = nombreClub
-    .normalize("NFD")                    // elimina tildes
+  // Normalizar el nombre (por si tiene acentos o mayúsculas)
+  const club = nombreClub.normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
-    .replace(/ñ/g, "n")                  // convierte ñ en n
-    .replace(/["]/g, "")              // saca comillas
     .trim();
-  return `https://globopedia.github.io/Artids/Escudos/${fileName}.png`;
+  const url = `https://globopedia.github.io/Artids/escudos/${club}.png`;
+  return url;
 }
     
    function renderTrayectoriaEscudos(trayectoria) {
