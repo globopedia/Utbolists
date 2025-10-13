@@ -489,14 +489,16 @@ const jugadores = (p.Huracán || "")
       return "";
     }
 
-  function getEscudoClub(nombreClub) {
+function getEscudoClub(nombreClub) {
   if (!nombreClub) return "";
-  // Normalizar el nombre (por si tiene acentos o mayúsculas)
-  const club = nombreClub.normalize("NFD")
+  const fileName = nombreClub
+    .normalize("NFD")                    // elimina tildes
     .replace(/[\u0300-\u036f]/g, "")
+    .replace(/ñ/g, "n")                  // convierte ñ en n
+    .replace(/[()"]/g, "")              // saca paréntesis y comillas
+    .replace(/\s+/g, " ")               // normaliza espacios
     .trim();
-  const url = `https://globopedia.github.io/Artids/escudos/${club}.png`;
-  return url;
+  return `https://globopedia.github.io/buscador-partidos/Escudos/${fileName}.png`;
 }
     
    function renderTrayectoriaEscudos(trayectoria) {
