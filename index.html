@@ -236,10 +236,25 @@ function mostrarFutbolistas() {
       .map(p => `<img src="https://globopedia.github.io/Artids/Banderas/${encodeURIComponent(p)}.png" alt="${p}" title="${p}" class="bandera">`)
       .join("")
   : ""}
- <div class="trayectoria-escudos">
+  <div class="trayectoria-escudos">
     ${renderTrayectoriaEscudos(futbolista.trayectoria)}
   </div>
-  </div>
+${futbolista.trayectoria
+  ? futbolista.trayectoria
+      .split(/[,;/]/)               // separa por coma, punto y coma o barra
+      .map(nombre => nombre.trim())
+      .filter(nombre => nombre.length > 0)
+      .map(nombre => `
+        <img 
+          src="${getEscudoClub(nombre)}" 
+          alt="${nombre}" 
+          title="${nombre}" 
+          style="height:32px;margin:4px;" 
+          onerror="this.style.display='none'">
+      `)
+      .join("")
+  : ""}
+    </div>
     </div>
     <p><b>Nombre:</b> ${futbolista.nombre}</p>
     <p><b>Posición:</b> ${futbolista.posicion}</p>
@@ -439,15 +454,17 @@ const jugadores = (p.Huracán || "")
       }
     });
 
-    function getEscudo(nombreClub) {
-      if (!nombreClub) return "";
-      try {
-        return "https://globopedia.github.io/Artids/escudos/" + encodeURIComponent(nombreClub.trim()) + ".png";
-      } catch (err) {
-        const fileName = nombreClub.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\./g, "").replace(/\s+/g, "") + ".png";
-        return "https://globopedia.github.io/Artids/escudos/" + fileName;
-      }
-    }
+    function getEscudoClub(nombreClub) {
+  if (!nombreClub) return "";
+  const club = nombreClub
+    .normalize("NFD")                    // elimina acentos
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/ñ/g, "n")                  // convierte ñ en n
+    .replace(/Ñ/g, "N")                  // por si aparece mayúscula
+    .trim();
+
+  return `https://globopedia.github.io/Artids/escudos/${club}.png`;
+}
 
     function renderIncidencias(texto) {
       if (!texto) return "";
