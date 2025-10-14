@@ -239,21 +239,24 @@ function mostrarFutbolistas() {
   <div class="trayectoria-escudos">
     ${renderTrayectoriaEscudos(futbolista.trayectoria)}
   </div>
+  </div>
+  </div>
     <p><b>Nombre:</b> ${futbolista.nombre}</p>
     <p><b>Posición:</b> ${futbolista.posicion}</p>
     <p><b>Procedencia:</b> ${futbolista.procedencia}</p>
-    <p><b>Nacimiento:</b> ${futbolista.fechanac}, en ${futbolista.lugarnacimiento}</p>
+    <p><b>Nacimiento:</b> ${futbolista.fechanac}, en ${futbolista.lugarnac}</p>
     <p><b>Muerte:</b> ${futbolista.fechamuerte}, en ${futbolista.lugarmuerte}</p>
     <p><b>Peso:</b> ${futbolista.peso} kg — <b>Altura:</b> ${futbolista.altura} m</p>
     <p><b>Destino:</b> ${futbolista.destino}</p>
     <p><b>Biografía:</b> ${futbolista.biografía}</p>
     <div style="text-align:center;">
-    <p>${futbolista.foto2 ? `<img src="${futbolista.foto2}" alt="${futbolista.futbolista}" style="width:280px;height:360px;object-fit:cover;border-radius:8px;">` : ""}</p>
-       <div class="stats"></div>
+    ${futbolista.foto2 ? `<img src="${futbolista.foto2}" alt="${futbolista.futbolista}" style="width:280px;height:360px;object-fit:cover;border-radius:8px;">` : ""}
+</div>
+<div class="stats">
   <h3 style="color:#FF0000;">📊 TRAYECTORIA EN HURACÁN</h3>
   ${renderEstadisticas(futbolista.futbolista)}
+</div>
       `;
-    }
 function limpiarNombreJugador(s) {
   if (!s) return "";
   return String(s)
