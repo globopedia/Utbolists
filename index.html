@@ -447,7 +447,6 @@ const jugadores = (p.Huracán || "")
     .replace(/ñ/g, "n")                  // ñ → n
     .replace(/Ñ/g, "N")
     .replace(/[()]/g, "")               // elimina paréntesis
-    .replace(/\s+/g, "")                // elimina espacios
     .trim();
   return `https://globopedia.github.io/Artids/escudos/${club}.png`;
 }
