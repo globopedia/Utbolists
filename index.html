@@ -442,8 +442,6 @@ const jugadores = (p.Huracán || "")
     function getEscudoClub(nombreClub) {
   if (!nombreClub) return "";
   const club = nombreClub
-    .replace(/ñ/g, "n")                  // ñ → n
-    .replace(/Ñ/g, "N")
     .trim();
   return `https://globopedia.github.io/Artids/escudos/${club}.png`;
 }
