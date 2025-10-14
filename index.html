@@ -449,11 +449,10 @@ const jugadores = (p.Huracán || "")
       }
     });
 
-    function getEscudoClub(nombreClub) {
+    function getEscudo(nombreClub) {
   if (!nombreClub) return "";
-  const club = nombreClub
-    .trim();
-      return `https://globopedia.github.io/Artids/escudos/${club}.png`;
+  const club = nombreClub.trim();
+      return `https://globopedia.github.io/Artids/escudos/${encodeURIComponent(club)}.png`;
 }
     function renderIncidencias(texto) {
       if (!texto) return "";
