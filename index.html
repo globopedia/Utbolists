@@ -225,7 +225,12 @@ function mostrarFutbolistas() {
       cont.style.display = "block";
       cont.innerHTML = `
         <div class="club-header">
-      ${futbolista.foto1 ? `<img src="${futbolista.foto1}" alt="${futbolista.futbolista}" style="width:105px;height:140px;object-fit:cover;border-radius:8px;">` : ""}
+${futbolista.foto1 ? 
+  `<img src="${futbolista.foto1}" 
+        alt="${futbolista.futbolista}" 
+        style="width:105px;height:140px;object-fit:cover;border-radius:8px;" 
+        onerror="this.style.display='none'">` 
+  : ""}
       <div style="text-align:center;">
   <h2>${futbolista.futbolista}</h2>
   ${futbolista.pais
@@ -250,7 +255,12 @@ function mostrarFutbolistas() {
     <p><b>Destino:</b> ${futbolista.destino}</p>
     <p><b>Biografía:</b> ${futbolista.biografía}</p>
     <div style="text-align:center;">
-    ${futbolista.foto2 ? `<img src="${futbolista.foto2}" alt="${futbolista.futbolista}" style="width:280px;height:360px;object-fit:cover;border-radius:8px;">` : ""}
+    ${futbolista.foto2 ? 
+  `<img src="${futbolista.foto2}" 
+        alt="${futbolista.futbolista}" 
+        style="width:280px;height:360px;object-fit:cover;border-radius:8px;" 
+        onerror="this.style.display='none'">` 
+  : ""}
 </div>
 <div class="stats">
   <h3 style="color:#FF0000;">📊 TRAYECTORIA EN HURACÁN</h3>
