@@ -442,7 +442,6 @@ const jugadores = (p.Huracán || "")
     function getEscudoClub(nombreClub) {
   if (!nombreClub) return "";
   const club = nombreClub
-    .normalize("NFD")                    // separa letras y tildes
     .replace(/ñ/g, "n")                  // ñ → n
     .replace(/Ñ/g, "N")
     .trim();
