@@ -235,7 +235,7 @@ ${futbolista.foto1 ?
   <h2>${futbolista.futbolista}</h2>
   ${futbolista.pais
   ? futbolista.pais
-      .split(/[\(\),.;\/]|(?:\)\s*)|(?:\s*\()|(?:\s*y\s*)|(?:\s*\d+\s*)/)
+      .split(/[\(\),.;\/]|(?:\)\s*)|(?:\s*\()|(?:\s*\d+\s*)/)
       .map(p => p.trim())
       .filter(p => p.length > 0)
       .map(p => `<img src="https://globopedia.github.io/Artids/Banderas/${encodeURIComponent(p)}.png" alt="${p}" title="${p}" class="bandera">`)
