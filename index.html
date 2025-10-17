@@ -461,6 +461,7 @@ function getResumenCarrera(nombreFutbolista) {
     const jugadores = (p.Huracán || "")
       .replace(/ \(/g, ",")
       .replace(/\d+/g, "")
+      .replace(/\.+/g, "")
       .replace(/\)+/g, "")
       .replace(/\s+y\s+/gi, ",")
       .replace(/,,+/g, ",")
