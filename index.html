@@ -233,6 +233,11 @@ ${futbolista.foto1 ?
   : ""}
       <div style="text-align:center;">
   <h2>${futbolista.futbolista}</h2>
+  <div style="font-size:14px; color:black; font-family:Arial, sans-serif;">
+    ${getResumenCarrera(futbolista.futbolista)}
+  </div>
+      <div style="text-align:center;">
+  <h2>${futbolista.futbolista}</h2>
   ${futbolista.pais
   ? futbolista.pais
       .split(/[\(\),.;\/]|(?:\)\s*)|(?:\s*\()|(?:\s*\d+\s*)/)
@@ -247,11 +252,6 @@ ${futbolista.foto1 ?
   </div>
   </div>
     <p><b>Nombre:</b> ${futbolista.nombre}</p>
-<div style="text-align:center;">
-  <h2>${futbolista.futbolista}</h2>
-  <div style="font-size:14px; color:black; font-family:Arial, sans-serif;">
-    ${getResumenCarrera(futbolista.futbolista)}
-  </div>
     <p><b>Posición:</b> ${futbolista.posicion}</p>
     <p><b>Procedencia:</b> ${futbolista.procedencia}</p>
     <p><b>Nacimiento:</b> ${futbolista.fechanac}, en ${futbolista.lugarnac}</p>
