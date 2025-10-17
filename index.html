@@ -289,7 +289,7 @@ const jugadores = (p.Huracán || "")
   // 2. Elimina todos los números
   .replace(/\d+/g, "")
   // ✨ 2.1. Elimina puntos al final de cada nombre
-  .replace(/\./g, "")
+  .replace(/\.+/g, "")
   // 3. Elimina paréntesis de cierre simples o dobles
   .replace(/\)+/g, "")
   // 4. Reemplaza el conector " y " (o variantes con espacios extra) por coma
@@ -364,7 +364,7 @@ const jugadores = (p.Huracán || "")
   // 2. Elimina todos los números
   .replace(/\d+/g, "")
   // ✨ 2.1. Elimina puntos al final de cada nombre
-  .replace(/\./g, "")
+  .replace(/\.+/g, "")
   // 3. Elimina paréntesis de cierre simples o dobles
   .replace(/\)+/g, "")
   // 4. Reemplaza el conector " y " (o variantes con espacios extra) por coma
