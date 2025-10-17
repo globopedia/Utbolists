@@ -247,6 +247,11 @@ ${futbolista.foto1 ?
   </div>
   </div>
     <p><b>Nombre:</b> ${futbolista.nombre}</p>
+<div style="text-align:center;">
+  <h2>${futbolista.futbolista}</h2>
+  <div style="font-size:14px; color:black; font-family:Arial, sans-serif;">
+    ${getResumenCarrera(futbolista.futbolista)}
+  </div>
     <p><b>Posición:</b> ${futbolista.posicion}</p>
     <p><b>Procedencia:</b> ${futbolista.procedencia}</p>
     <p><b>Nacimiento:</b> ${futbolista.fechanac}, en ${futbolista.lugarnac}</p>
@@ -449,6 +454,42 @@ const jugadores = (p.Huracán || "")
       }
     });
 
+function getResumenCarrera(nombreFutbolista) {
+  const delFutbolista = encuentros.filter(p => {
+    const jugadores = (p.Huracán || "")
+      .replace(/ \(/g, ",")
+      .replace(/\d+/g, "")
+      .replace(/\)+/g, "")
+      .replace(/\s+y\s+/gi, ",")
+      .replace(/,,+/g, ",")
+      .replace(/\s+,/g, ",")
+      .replace(/,\s+/g, ",")
+      .replace(/\s+/g, " ")
+      .split(/[,;]+/)
+      .map(j => j.replace(/^[()\s]+|[()\s]+$/g, "").trim())
+      .filter(j => j.length > 1);
+    return jugadores.some(j => norm(j) === norm(nombreFutbolista));
+  });
+
+  if (!delFutbolista.length) return "";
+
+  // Total de partidos
+  const total = delFutbolista.length;
+
+  // Ordenar fechas para obtener la primera y última
+  const fechasOrdenadas = delFutbolista
+    .map(p => p.Fecha)
+    .map(f => {
+      const [d, m, a] = f.split("/");
+      return new Date(`${a}-${m}-${d}`);
+    })
+    .sort((a, b) => a - b);
+
+  const primerAnio = fechasOrdenadas[0].getFullYear();
+  const ultimoAnio = fechasOrdenadas[fechasOrdenadas.length - 1].getFullYear();
+
+  return `${total} ${total === 1 ? "partido" : "partidos"} (${primerAnio}-${ultimoAnio})`;
+}
     function getEscudo(nombreClub) {
   if (!nombreClub) return "";
   const club = nombreClub.trim();
