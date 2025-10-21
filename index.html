@@ -42,17 +42,23 @@
   box-shadow: 0 0 2px rgba(0,0,0,0.3);
   vertical-align: middle;
 }
-    
+#autocompleteList li:hover {
+  background-color: #ffdddd;
+  border-radius: 6px;
+  box-shadow: 0 0 4px rgba(255, 0, 0, 0.2);
+  transition: all 0.2s;
+}    
   </style>
 </head>
 <body>
   <img src="https://globopedia.github.io/Artids/logo_globopedia.png" alt="Logo Huracán" class="logo" />
   <h1>📜 Futbolistas</h1>
 
-  <div style="text-align:center;">
-    <label>Seleccioná futbolista: </label>
-    <select id="futbolistaSelect"></select>
-  </div>
+<div style="text-align:center; position:relative;">
+  <label for="futbolistaSearch">Buscá futbolista: </label>
+  <input type="text" id="futbolistaSearch" placeholder="Escribí un nombre..." autocomplete="off" style="padding:8px;border-radius:8px;border:2px solid #FF0000;font-size:16px;margin-bottom:20px;"><select id="futbolistaSelect" style="display:none;"></select>
+  <ul id="autocompleteList" style="position:absolute;left:50%;transform:translateX(-50%);background:white;border:1px solid #ccc;border-radius:8px;width:300px;max-height:200px;overflow:auto;list-style:none;padding:0;margin-top:2px;z-index:1000;"></ul>
+</div>
 
   <div id="futbolistaInfo" class="club-card" style="display:none;"></div>
 
@@ -586,6 +592,121 @@ function renderTrayectoriaEscudos(trayectoria) {
   const nombres = partes.slice(0, i).join(" ");
   return apellido + ", " + nombres;
 }
-  </script>
+// --- AUTOCOMPLETADO CON DEBOUNCE --- //
+const searchInput = document.getElementById("futbolistaSearch");
+const suggestionsList = document.getElementById("autocompleteList");
+let debounceTimer;
+
+function debounce(func, delay) {
+  return function(...args) {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => func.apply(this, args), delay);
+  };
+}
+
+function filtrarFutbolistas(termino) {
+  const termNorm = norm(termino);
+  if (!termNorm) {
+    suggestionsList.innerHTML = "";
+    return;
+  }
+
+  const resultados = futbolistas
+    .filter(a => norm(a.futbolista).includes(termNorm))
+    .slice(0, 15); // limitar cantidad de sugerencias
+
+  suggestionsList.innerHTML = resultados.map(r => `
+    <li style="padding:6px;cursor:pointer;border-bottom:1px solid #eee;" 
+        onclick="seleccionarFutbolista('${r.futbolista.replace(/'/g, "\\'")}')">
+      ${InvertirNombre(r.futbolista)}
+    </li>
+  `).join("");
+}
+
+searchInput.addEventListener("input", debounce(e => filtrarFutbolistas(e.target.value), 200));
+
+function seleccionarFutbolista(nombre) {
+  searchInput.value = InvertirNombre(nombre);
+  suggestionsList.innerHTML = "";
+  const hiddenSelect = document.getElementById("futbolistaSelect");
+  hiddenSelect.innerHTML = `<option value="${nombre}" selected></option>`;
+  hiddenSelect.value = nombre;
+  mostrarFutbolistas();
+}
+  // --- Navegación con teclado en el autocompletado --- //
+let selectedIndex = -1;
+
+searchInput.addEventListener("keydown", function(e) {
+  const items = suggestionsList.querySelectorAll("li");
+  if (!items.length) return;
+
+  if (e.key === "ArrowDown") {
+    e.preventDefault();
+    selectedIndex = (selectedIndex + 1) % items.length;
+    actualizarSeleccion(items);
+  } else if (e.key === "ArrowUp") {
+    e.preventDefault();
+    selectedIndex = (selectedIndex - 1 + items.length) % items.length;
+    actualizarSeleccion(items);
+  } else if (e.key === "Enter") {
+    e.preventDefault();
+    if (selectedIndex >= 0 && selectedIndex < items.length) {
+      items[selectedIndex].click();
+    }
+  } else {
+    selectedIndex = -1; // reset si escribe algo nuevo
+  }
+});
+
+function actualizarSeleccion(items) {
+  items.forEach((item, i) => {
+    const activo = i === selectedIndex;
+    item.style.background = activo ? "#ffdddd" : "white";
+    if (activo) {
+      // 👉 Mostrar texto completo en el input (typeahead visual)
+      const texto = item.textContent.trim();
+      searchInput.value = texto;
+    }
+  });
+
+  // desplazamiento automático si el ítem está fuera de vista
+  const selectedItem = items[selectedIndex];
+  if (selectedItem) {
+    const containerTop = suggestionsList.scrollTop;
+    const containerBottom = containerTop + suggestionsList.offsetHeight;
+    const itemTop = selectedItem.offsetTop;
+    const itemBottom = itemTop + selectedItem.offsetHeight;
+    if (itemTop < containerTop) {
+      suggestionsList.scrollTop = itemTop;
+    } else if (itemBottom > containerBottom) {
+      suggestionsList.scrollTop = itemBottom - suggestionsList.offsetHeight;
+    }
+  }
+}
+// --- Cerrar autocompletado con ESC --- //
+searchInput.addEventListener("keydown", function(e) {
+  if (e.key === "Escape") {
+    suggestionsList.innerHTML = "";
+    selectedIndex = -1;
+    searchInput.blur(); // opcional: quita el foco del input
+  }
+});
+// --- Cerrar autocompletado al hacer clic fuera --- //
+document.addEventListener("click", function(e) {
+  const esClickEnInput = searchInput.contains(e.target);
+  const esClickEnLista = suggestionsList.contains(e.target);
+  if (!esClickEnInput && !esClickEnLista) {
+    suggestionsList.innerHTML = "";
+    selectedIndex = -1;
+  }
+});
+// --- Reabrir sugerencias si el input tiene texto y se hace clic --- //
+searchInput.addEventListener("focus", function() {
+  const texto = searchInput.value.trim();
+  if (texto.length > 0 && suggestionsList.innerHTML === "") {
+    filtrarFutbolistas(texto);
+  }
+});
+</script>
 </body>
 </html>
