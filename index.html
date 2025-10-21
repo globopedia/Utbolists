@@ -618,7 +618,7 @@ function filtrarFutbolistas(termino) {
   suggestionsList.innerHTML = resultados.map(r => `
     <li style="padding:6px;cursor:pointer;border-bottom:1px solid #eee;" 
         onclick="seleccionarFutbolista('${r.futbolista.replace(/'/g, "\\'")}')">
-      ${InvertirNombre(r.futbolista)}
+      ${r.futbolista}
     </li>
   `).join("");
 }
