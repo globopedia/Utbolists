@@ -490,7 +490,18 @@ function getResumenCarrera(nombreFutbolista) {
   // Total de partidos
   const total = delFutbolista.length;
 
-  // Ordenar fechas para obtener la primera y última
+  // ✅ Goles del jugador
+  const totalGoles = encuentros.reduce((acc, p) => {
+    const incidencias = (p.Incidencias || "").split(/[,;]+/);
+    const golesJugador = incidencias.filter(txt =>
+      norm(txt).includes("gol") &&
+      norm(txt).includes(norm(nombreFutbolista)) &&
+      norm(txt).includes("(hur)")
+    ).length;
+    return acc + golesJugador;
+  }, 0);
+
+// Ordenar fechas para obtener la primera y última
   const fechasOrdenadas = delFutbolista
     .map(p => p.Fecha)
     .map(f => {
@@ -502,7 +513,7 @@ function getResumenCarrera(nombreFutbolista) {
   const primerAnio = fechasOrdenadas[0].getFullYear();
   const ultimoAnio = fechasOrdenadas[fechasOrdenadas.length - 1].getFullYear();
 
-  return `${total} ${total === 1 ? "partido" : "partidos"} (${primerAnio}-${ultimoAnio})`;
+  return `${total} ${total === 1 ? "partido" : "partidos"} – ${totalGoles} ${totalGoles === 1 ? "gol" : "goles"} (${primerAnio}-${ultimoAnio})`;
 }
     function getEscudo(nombreClub) {
   if (!nombreClub) return "";
