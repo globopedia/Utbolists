@@ -701,15 +701,18 @@ document.addEventListener("click", function(e) {
   }
 });
 // --- Reabrir sugerencias si el input tiene texto y se hace clic --- //
-searchInput.addEventListener("focus", function() {
+searchInput.addEventListener("focus", function(e) {
   const texto = searchInput.value.trim();
   if (texto.length > 0 && suggestionsList.innerHTML === "") {
     filtrarFutbolistas(texto);
   }
-// Seleccionar todo el texto al enfocar
+
+  // 🪄 Truco: seleccionar todo el texto después de un clic o foco
   setTimeout(() => {
-    searchInput.select();
-  }, 50);
+    if (document.activeElement === searchInput) {
+      searchInput.select();
+    }
+  }, 150);
 });
 </script>
 </body>
