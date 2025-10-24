@@ -289,72 +289,72 @@ function limpiarNombreJugador(s) {
     
 function renderEstadisticas(nombreFutbolista) {
   const delFutbolista = encuentros.filter(p => {
-const jugadores = (p.Huracán || "")
-  // 1. Reemplaza " (" por coma para separar correctamente los ingresos
-  .replace(/ \(/g, ",")
-  // 2. Elimina todos los números
-  .replace(/\d+/g, "")
-  // ✨ 2.1. Elimina puntos al final de cada nombre
-  .replace(/\.+/g, "")
-  // 3. Elimina paréntesis de cierre simples o dobles
-  .replace(/\)+/g, "")
-  // 4. Reemplaza el conector " y " (o variantes con espacios extra) por coma
-  .replace(/\s+y\s+/gi, ",")
-  // 4.2 Reemplaza el conector " e " (o variantes con espacios extra) por coma
-  .replace(/\s+e\s+/gi, ",")
-  // 5. Limpia dobles comas y espacios innecesarios
-  .replace(/,,+/g, ",")
-  .replace(/\s+,/g, ",")
-  .replace(/,\s+/g, ",")
-  .replace(/\s+/g, " ")
-  // 6. Divide por comas o punto y coma
-  .split(/[,;]+/)
-  // 7. Quita paréntesis o espacios residuales
-  .map(j => j.replace(/^[()\s]+|[()\s]+$/g, "").trim())
-  // 8. Filtra vacíos o elementos cortos
-  .filter(j => j.length > 1);
-  return jugadores.some(j => norm(j) === norm(nombreFutbolista));
+    const jugadores = (p.Huracán || "")
+      .replace(/ \(/g, ",")
+      .replace(/\d+/g, "")
+      .replace(/\.+/g, "")
+      .replace(/\)+/g, "")
+      .replace(/\s+y\s+/gi, ",")
+      .replace(/\s+e\s+/gi, ",")
+      .replace(/,,+/g, ",")
+      .replace(/\s+,/g, ",")
+      .replace(/,\s+/g, ",")
+      .replace(/\s+/g, " ")
+      .split(/[,;]+/)
+      .map(j => j.replace(/^[()\s]+|[()\s]+$/g, "").trim())
+      .filter(j => j.length > 1);
+    return jugadores.some(j => norm(j) === norm(nombreFutbolista));
   });
 
   const agg = {};
   for (const e of delFutbolista) {
     const comp = bucketCompetencia(e.Torneo);
     const sit = cap(norm(e.Situación));
-    if (!agg[comp]) agg[comp] = { Victoria:0, Empate:0, Derrota:0 };
+    if (!agg[comp]) agg[comp] = { Victoria:0, Empate:0, Derrota:0, Goles:0 };
     if (SITUACIONES.includes(sit)) {
       agg[comp][sit] += 1;
     }
+
+    // ✅ contar goles del jugador en esta competencia
+    const incidencias = (e.Incidencias || "").split(/[,;]+/);
+    const golesJugador = incidencias.filter(txt =>
+      norm(txt).includes("gol") &&
+      norm(txt).includes(norm(nombreFutbolista)) &&
+      norm(txt).includes("(hur)")
+    ).length;
+    agg[comp].Goles += golesJugador;
   }
 
-let html = "";
-for (const comp of ORDEN_COMPETENCIAS) {
-  if (!agg[comp]) continue;
-  const bucket = agg[comp];
-  const total = bucket.Victoria + bucket.Empate + bucket.Derrota;
-  if (total === 0) continue;
+  let html = "";
+  for (const comp of ORDEN_COMPETENCIAS) {
+    if (!agg[comp]) continue;
+    const bucket = agg[comp];
+    const total = bucket.Victoria + bucket.Empate + bucket.Derrota;
+    if (total === 0) continue;
 
-  const resumen = `G${bucket.Victoria}-E${bucket.Empate}-P${bucket.Derrota}`;
+    const resumen = `G${bucket.Victoria}-E${bucket.Empate}-P${bucket.Derrota}`;
+    const goles = bucket.Goles || 0;
 
-  html += `
-    <div class="stat-group">
-      <div class="stat-title">🏆 ${comp}</div>
-      <ul>
-        <li>
-          <label>
-            <input type="checkbox" class="chkPartidos"
-              data-comp="${comp}"
-              data-sit="todos"
-              data-futbolista="${nombreFutbolista}">
-            📊 ${total} ${total === 1 ? "partido" : "partidos"} (${resumen})
-          </label>
-          <div class="partidos-lista" style="display:none; margin-left:20px;"></div>
-        </li>
-      </ul>
-    </div>
-  `;
+    html += `
+      <div class="stat-group">
+        <div class="stat-title">🏆 ${comp}</div>
+        <ul>
+          <li>
+            <label>
+              <input type="checkbox" class="chkPartidos"
+                data-comp="${comp}"
+                data-sit="todos"
+                data-futbolista="${nombreFutbolista}">
+              📊 ${total} ${total === 1 ? "partido" : "partidos"} (${resumen}) – ⚽ ${goles} ${goles === 1 ? "gol" : "goles"}
+            </label>
+            <div class="partidos-lista" style="display:none; margin-left:20px;"></div>
+          </li>
+        </ul>
+      </div>
+    `;
+  }
+  return html || "<p>Sin datos disponibles</p>";
 }
-return html || "<p>Sin datos disponibles</p>";
-  }
   // Manejador de checkboxes (muestra partidos por filtro)
 document.addEventListener("change", function(e) {
   if (!e.target.classList.contains("chkPartidos")) return;
