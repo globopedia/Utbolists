@@ -484,21 +484,18 @@ function getResumenCarrera(nombreFutbolista) {
 
   if (!delFutbolista.length) return "";
 
-  // Total de partidos
+  // ✅ Total de partidos
   const total = delFutbolista.length;
 
-  // ✅ Goles del jugador
+  // ✅ Contar TODAS las menciones de “GOL jugador (HUR)” en todo el CSV
   const totalGoles = encuentros.reduce((acc, p) => {
-    const incidencias = (p.Incidencias || "").split(/[,;]+/);
-    const golesJugador = incidencias.filter(txt =>
-      norm(txt).includes("gol") &&
-      norm(txt).includes(norm(nombreFutbolista)) &&
-      norm(txt).includes("(hur)")
-    ).length;
-    return acc + golesJugador;
+    const texto = norm(p.Incidencias || "");
+    const patron = new RegExp(`gol\\s+${norm(nombreFutbolista)}\\s*\\(hur\\)`, "g");
+    const coincidencias = texto.match(patron);
+    return acc + (coincidencias ? coincidencias.length : 0);
   }, 0);
 
-// Ordenar fechas para obtener la primera y última
+  // ✅ Fechas para obtener el primer y último año
   const fechasOrdenadas = delFutbolista
     .map(p => p.Fecha)
     .map(f => {
