@@ -315,14 +315,11 @@ function renderEstadisticas(nombreFutbolista) {
       agg[comp][sit] += 1;
     }
 
-    // ✅ contar goles del jugador en esta competencia
-    const incidencias = (e.Incidencias || "").split(/[,;]+/);
-    const golesJugador = incidencias.filter(txt =>
-      norm(txt).includes("gol") &&
-      norm(txt).includes(norm(nombreFutbolista)) &&
-      norm(txt).includes("(hur)")
-    ).length;
-    agg[comp].Goles += golesJugador;
+    // ✅ contar TODAS las menciones de “GOL jugador (HUR)”
+    const textoIncidencias = norm(e.Incidencias || "");
+    const patron = new RegExp(`gol\\s+${norm(nombreFutbolista)}\\s*\\(hur\\)`, "g");
+    const golesEnEstePartido = (textoIncidencias.match(patron) || []).length;
+    agg[comp].Goles += golesEnEstePartido;
   }
 
   let html = "";
