@@ -64,7 +64,8 @@
 
   <script>
     const futbolistasURL = "https://globopedia.github.io/Utbolists/Utbolists.csv?v=" + Date.now();
-    const partidosURL = "https://globopedia.github.io/Artids/Encuentros_Huracan.csv?v=" + Date.now();
+    const partidosURL = "https://globopedia.github.io/Artids/Artids2000.csv?v=" + Date.now();
+    const partidosURL2 = "https://globopedia.github.io/Artids/Encuentros_Huracan.csv?v=" + Date.now();
 
     let futbolistas = [];
     let encuentros = [];
@@ -160,11 +161,13 @@
       return "Otros";
     }
 
-    Promise.all([
-      fetch(futbolistasURL).then(r => r.text()),
-      fetch(partidosURL).then(r => r.text())
-    ])
-    .then(([csvFutbolistas, csvPartidos]) => {
+Promise.all([
+  fetch(futbolistasURL).then(r => { if(!r.ok) throw new Error("Futbolistas CSV no disponible"); return r.text(); }),
+  fetch(partidosURL).then(r => { if(!r.ok) throw new Error("Partidos CSV 1 no disponible"); return r.text(); }),
+  fetch(partidosURL2).then(r => { if(!r.ok) throw new Error("Partidos CSV 2 no disponible"); return r.text(); })
+])
+.then(([csvFutbolistas, csvPartidos1, csvPartidos2]) => {
+      
     futbolistas = Papa.parse(csvFutbolistas, { header: true, skipEmptyLines: true }).data.map(c => ({
         id: (c.ID ?? "").toString().trim(),
         futbolista: (c["Futbolista"] ?? "").toString().trim(),
@@ -185,7 +188,10 @@
         foto2: (c.Foto2 ?? "").toString().trim()
       }));
 
-      encuentros = Papa.parse(csvPartidos, { header:true, skipEmptyLines:true }).data.map(p => ({
+     const partidos1 = Papa.parse(csvPartidos1, { header:true, skipEmptyLines:true }).data;
+const partidos2 = Papa.parse(csvPartidos2, { header:true, skipEmptyLines:true }).data;
+
+encuentros = [...partidos1, ...partidos2].map(p => ({
         Fecha: (p.Fecha ?? "").trim(),
         Técnico: (p.Técnico ?? "").trim(),
         Condición: (p.Condición ?? "").trim(),
