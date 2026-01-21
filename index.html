@@ -90,10 +90,10 @@
 
     function bucketCompetencia(torneo) {
       const t = norm(torneo || "");
-      if (t.includes("mexico 2007")) return "Apertura Nacional B 2006";
-      if (t.includes("mexico 2007")) return "Clausura Nacional B 2007";
-      if (t.includes("mexico 2007")) return "Segundo Ascenso de Nacional B 2007";
-      if (t.includes("mexico 2007")) return "Promoción 2007";
+      if (t.includes("apertura nacional b 2006")) return "Apertura Nacional B 2006";
+      if (t.includes("clausura nacional b 2007")) return "Clausura Nacional B 2007";
+      if (t.includes("ascenso nacional b 2007")) return "Desempate 2° Puesto NB 2007";
+      if (t.includes("promocion 2007")) return "Promoción 2007";
       if (t.includes("mexico 2007")) return "Gira por México 2007";
       if (t.includes("apertura 2007")) return "Apertura 2007/08";
       if (t.includes("clausura 2008")) return "Clausura 2007/08";
