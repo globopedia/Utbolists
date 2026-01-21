@@ -73,7 +73,7 @@
     const norm = (t) => (t || "").toString().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase();
     const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : s;
 
-    const ORDEN_COMPETENCIAS = ["Apertura Nacional B 2006/07","Clausura Nacional B 2006/07","Segundo Ascenso de Nacional B 2006/07","Promoción 2007","Gira por México 2007","Apertura 2007/08","Clausura 2007/08","Copa Cafam 2008","Apertura 2008/09","Clausura 2008/09","Apertura 2009/10","Clausura 2009/10","Despedida de Marcelinho Carioca 2010","Apertura 2010/11",
+    const ORDEN_COMPETENCIAS = ["Apertura NB 2006/07","Clausura NB 2006/07","Desempate 2° Puesto BN 2006/07","Promoción 2007","Gira por México 2007","Apertura 2007/08","Clausura 2007/08","Copa Cafam 2008","Apertura 2008/09","Clausura 2008/09","Apertura 2009/10","Clausura 2009/10","Despedida de Marcelinho Carioca 2010","Apertura 2010/11",
 "Clausura 2010/11","Desempate Descenso 2011","Campeonato B Nacional 2011/12","Copa Argentina 2012","Copa de Clásicos 2012",
 "Campeonato B Nacional 2012/13","Copa Argentina 2013","Campeonato B Nacional 2013/14","Desempate 3° Puesto BN 2013/14","Copa Argentina 2014",
 "Desempate 3° Puesto NB 2013/14","Campeonato B Nacional 2014","Desempate 5° Puesto NB 2014",
@@ -90,9 +90,9 @@
 
     function bucketCompetencia(torneo) {
       const t = norm(torneo || "");
-      if (t.includes("apertura nacional b 2006")) return "Apertura Nacional B 2006/07";
-      if (t.includes("clausura nacional b 2007")) return "Clausura Nacional B 2006/07";
-      if (t.includes("ascenso nacional b 2007")) return "Desempate 2° Puesto NB 2006/07";
+      if (t.includes("apertura nacional b 2006")) return "Apertura B Nacional 2006/07";
+      if (t.includes("clausura nacional b 2007")) return "Clausura B Nacional 2006/07";
+      if (t.includes("ascenso nacional b 2007")) return "Desempate 2° Puesto BN 2006/07";
       if (t.includes("promocion 2007")) return "Promoción 2007";
       if (t.includes("mexico 2007")) return "Gira por México 2007";
       if (t.includes("apertura 2007")) return "Apertura 2007/08";
