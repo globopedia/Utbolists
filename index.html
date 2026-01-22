@@ -301,7 +301,7 @@ function renderEstadisticas(nombreFutbolista) {
   const delFutbolista = encuentros.filter(p => {
     const jugadores = (p.Huracán || "")
       .replace(/ \(/g, ",")
-      .replace(/\d+/g, "")
+      .replace(/^\s*\(?\d+(?:\+\d+)?\s*/g, "")
       .replace(/\.+/g, "")
       .replace(/\)+/g, "")
       .replace(/\s+y\s+/gi, ",")
@@ -377,7 +377,7 @@ const jugadores = (p.Huracán || "")
   // 1. Reemplaza " (" por coma para separar correctamente los ingresos
   .replace(/ \(/g, ",")
   // 2. Elimina todos los números
-  .replace(/\d+/g, "")
+  .replace(/^\s*\(?\d+(?:\+\d+)?\s*/g, "")
   // ✨ 2.1. Elimina puntos al final de cada nombre
   .replace(/\.+/g, "")
   // 3. Elimina paréntesis de cierre simples o dobles
@@ -477,7 +477,7 @@ function getResumenCarrera(nombreFutbolista) {
   const delFutbolista = encuentros.filter(p => {
     const jugadores = (p.Huracán || "")
       .replace(/ \(/g, ",")
-      .replace(/\d+/g, "")
+      .replace(/^\s*\(?\d+(?:\+\d+)?\s*/g, "")
       .replace(/\.+/g, "")
       .replace(/\)+/g, "")
       .replace(/\s+y\s+/gi, ",")
