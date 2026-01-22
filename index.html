@@ -299,14 +299,14 @@ function limpiarNombreJugador(s) {
     
 function renderEstadisticas(nombreFutbolista) {
   const delFutbolista = encuentros.filter(p => {
-   const jugadores = (p.Huracán || "")
-  // 1️⃣ convertir todo lo que esté entre paréntesis en coma + contenido
-  .replace(/\(([^)]+)\)/g, ",$1")
+ const jugadores = (p.Huracán || "")
+  // 1️⃣ convertir paréntesis en comas (sin regex anidada)
+  .replace(/[()]/g, ",")
 
-  // 2️⃣ eliminar minutos de ingreso: 45, 45+1, 90+3, etc.
+  // 2️⃣ eliminar minutos: 45, 45+1, 90+3, etc.
   .replace(/\b\d+(?:\+\d+)?\s*/g, "")
 
-  // 3️⃣ normalización general
+  // 3️⃣ normalización
   .replace(/\.+/g, "")
   .replace(/\s+y\s+/gi, ",")
   .replace(/\s+e\s+/gi, ",")
@@ -380,13 +380,13 @@ document.addEventListener("change", function(e) {
     const partidos = encuentros.filter(p => {
       // el jugador aparece en la celda de Huracán
 const jugadores = (p.Huracán || "")
-  // 1️⃣ convertir todo lo que esté entre paréntesis en coma + contenido
-  .replace(/\(([^)]+)\)/g, ",$1")
+  // 1️⃣ convertir paréntesis en comas (sin regex anidada)
+  .replace(/[()]/g, ",")
 
-  // 2️⃣ eliminar minutos de ingreso: 45, 45+1, 90+3, etc.
+  // 2️⃣ eliminar minutos: 45, 45+1, 90+3, etc.
   .replace(/\b\d+(?:\+\d+)?\s*/g, "")
 
-  // 3️⃣ normalización general
+  // 3️⃣ normalización
   .replace(/\.+/g, "")
   .replace(/\s+y\s+/gi, ",")
   .replace(/\s+e\s+/gi, ",")
@@ -477,14 +477,14 @@ const jugadores = (p.Huracán || "")
 
 function getResumenCarrera(nombreFutbolista) {
   const delFutbolista = encuentros.filter(p => {
-   const jugadores = (p.Huracán || "")
-  // 1️⃣ convertir todo lo que esté entre paréntesis en coma + contenido
-  .replace(/\(([^)]+)\)/g, ",$1")
+  const jugadores = (p.Huracán || "")
+  // 1️⃣ convertir paréntesis en comas (sin regex anidada)
+  .replace(/[()]/g, ",")
 
-  // 2️⃣ eliminar minutos de ingreso: 45, 45+1, 90+3, etc.
+  // 2️⃣ eliminar minutos: 45, 45+1, 90+3, etc.
   .replace(/\b\d+(?:\+\d+)?\s*/g, "")
 
-  // 3️⃣ normalización general
+  // 3️⃣ normalización
   .replace(/\.+/g, "")
   .replace(/\s+y\s+/gi, ",")
   .replace(/\s+e\s+/gi, ",")
