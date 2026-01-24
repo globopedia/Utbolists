@@ -297,6 +297,30 @@ function limpiarNombreJugador(s) {
     .trim();
 }
     
+function obtenerMinutoIngreso(texto, futbolista) {
+  const regex = new RegExp(`\\((\\d+(?:\\+\\d+)?)\\s*${futbolista}`, "i");
+  const match = texto.match(regex);
+  if (!match) return null;
+
+  const m = match[1];
+  return m.includes("+")
+    ? m.split("+").map(Number).reduce((a,b)=>a+b)
+    : Number(m);
+}
+function obtenerMinutoSalida(texto, futbolista) {
+  const regex = new RegExp(
+    `${futbolista}\\s*\\(\\s*(\\d+(?:\\+\\d+)?)\\s+[^()]+`,
+    "i"
+  );
+
+  const match = texto.match(regex);
+  if (!match) return null;
+
+  const m = match[1];
+  return m.includes("+")
+    ? m.split("+").map(Number).reduce((a,b)=>a+b)
+    : Number(m);
+}
 function renderEstadisticas(nombreFutbolista) {
   const delFutbolista = encuentros.filter(p => {
  const jugadores = (p.Huracán || "")
@@ -446,10 +470,80 @@ const jugadores = (p.Huracán || "")
           `;
         }
 
-        contenedor.innerHTML += `
+// --- TITULAR / SUPLENTE + MINUTOS (DEFINITIVO) ---
+
+const texto = p.Huracán || "";
+const jugador = futbolista; // ← el nombre que ya usás en el index
+let condicion = "Titular";
+
+let minutosJugados = p.Fin2T || 90;
+
+// normalizar fin del partido
+if (typeof minutosJugados === "string" && minutosJugados.includes("+")) {
+  const [a, b] = minutosJugados.split("+").map(Number);
+  minutosJugados = a + b;
+}
+minutosJugados = Number(minutosJugados) || 90;
+
+// patrón: "Jugador (73 Otro)"
+const saleRegex = new RegExp(`${jugador}\\s*\\((\\d+(?:\\+\\d+)?)`, "i");
+
+// patrón: "(73 Jugador)"
+const entraRegex = new RegExp(`\\((\\d+(?:\\+\\d+)?)\\s*${jugador}`, "i");
+
+const ingreso = obtenerMinutoIngreso(texto, futbolista);
+const salida  = obtenerMinutoSalida(texto, futbolista);
+
+if (ingreso !== null) {
+  // 👉 siempre suplente si tiene minuto de ingreso
+  condicion = "Suplente";
+
+  let finReal = p.Fin2T ? Number(p.Fin2T) : 90;
+
+  if (salida !== null) {
+    finReal = salida - 1;
+  }
+
+  minutosJugados = Math.max(0, finReal - ingreso + 1);
+
+} else if (salida !== null) {
+  // 👉 titular que fue reemplazado
+  condicion = "Titular";
+  minutosJugados = Math.max(0, salida - 1);
+}
+
+// --- EXPULSIONES ---
+const incidencias = p.Incidencias || "";
+
+// ejemplo: "73 EXP Joaquín Larrivey"
+const expulsionRegex = new RegExp(
+  `(\\d+(?:\\+\\d+)?)\\s+EXP\\s+${futbolista}`,
+  "i"
+);
+
+if (expulsionRegex.test(incidencias)) {
+  const m = incidencias.match(expulsionRegex)[1];
+
+  let minutoExpulsion = m.includes("+")
+    ? m.split("+").map(Number).reduce((a, b) => a + b)
+    : Number(m);
+
+  if (condicion === "Titular") {
+    // jugó hasta el minuto anterior a la expulsión
+    minutosJugados = Math.max(0, minutoExpulsion - 1);
+  } else {
+    // suplente expulsado
+    // ingreso = fin del partido - minutos jugados + 1
+    const fin = p.Fin2T ? Number(p.Fin2T) : 90;
+    const minutoIngreso = fin - minutosJugados + 1;
+    minutosJugados = Math.max(0, minutoExpulsion - minutoIngreso + 1);
+  }
+}
+       contenedor.innerHTML += `
           <div class="acordeon">
           <div class="acordeon-header">
-  ${p.Resultado1}-${p.Resultado2}
+ ${condicion} (${minutosJugados}’) ·
+ ${p.Resultado1}-${p.Resultado2}
   <img src="${getEscudo(p.Club)}" alt="${p.Club}" title="${p.Club}"
        style="height:22px; vertical-align:middle; margin:0 6px;">
   [${p.Técnico}]
