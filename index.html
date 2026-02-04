@@ -7,7 +7,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=MuseoModerno:wght@500&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'MuseoModerno', arial-black; background:#fff; color:#222; margin:20px; }
+    body { font-family: 'Candara', arial-black; background:#fff; color:#222; margin:20px; }
     h1 { color:#FF0000; text-align:center; }
     .logo { display:block; margin:0 auto 10px; width:100px; }
     select { padding:8px; border-radius:8px; border:2px solid #FF0000; font-size:16px; margin-bottom:20px; }
@@ -35,7 +35,23 @@
     .resultado-con-escudo { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content:center; }
     .stat-title small { color:#666; font-weight:normal; margin-left:6px; }
 
-  .bandera {
+ .autocomplete-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  cursor: pointer;
+}
+
+.autocomplete-item img {
+  width: 32px;
+  height: 42px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+ .bandera {
   height: 30px;
   margin: 6px;
   border-radius: 5px;
@@ -88,7 +104,239 @@
     const CONDICIONES = ["Local","Neutral","Visitante"];
     const SITUACIONES = ["Victoria","Empate","Derrota"];
 
-    function bucketCompetencia(torneo) {
+// === COEFICIENTES DE RENDIMIENTO ===
+
+const COEF_BASE = {
+  Victoria:   { Visitante: 0.5,  Neutral:  0.4,  Local:  0.3 },
+  Empate:     { Visitante: 0.1,  Neutral:  0,  Local:  -0.1 },
+  Derrota:    { Visitante: -0.3,  Neutral: -0.4,  Local:  -0.5 }
+};
+
+function esInternacional(torneo) {
+  const t = norm(torneo);
+  return t.includes("libertadores") ||
+         t.includes("sudamericana") ||
+         t.includes("conmebol");
+}
+
+function esNacionalB(torneo) {
+  const t = norm(torneo);
+  return t.includes("nacional b") ||
+         t.includes("primera b nacional") ||
+         t.includes("bn");
+}
+
+const CLASICOS = [
+  { club: "San Isidro", desde: "1914-01", hasta: "1916-12" },
+  { club: "Racing Club", desde: "1914-01", hasta: "1919-08" },
+  { club: "Racing Club", desde: "1927-01", hasta: "1934-12" },
+  { club: "Racing Club", desde: "1936-07", hasta: "1937-12" },
+  { club: "Racing Club", desde: "1949-07", hasta: "1951-12" },
+  { club: "Racing Club", desde: "1993-07", hasta: "1994-06" },
+  { club: "Racing Club", desde: "1995-07", hasta: "1996-06" },
+  { club: "Racing Club", desde: "1997-01", hasta: "1997-06" },
+  { club: "Racing Club", desde: "1998-07", hasta: "1999-06" },
+  { club: "Racing Club", desde: "2001-07", hasta: "2002-06" },
+  { club: "Racing Club", desde: "2005-01", hasta: "2005-12" },
+  { club: "Racing Club", desde: "2015-01", hasta: "2021-06" },
+  { club: "Racing Club", desde: "2022-07", hasta: "2023-06" },
+  { club: "Racing Club", desde: "2024-07", hasta: "2025-06" },
+  { club: "Estudiantes", desde: "1914-01", hasta: "1915-12" },
+  { club: "Estudiantes (La Plata)", desde: "1915-01", hasta: "1915-12" },
+  { club: "Estudiantes (La Plata)", desde: "1928-01", hasta: "1932-12" },
+  { club: "Estudiantes (La Plata)", desde: "1944-01", hasta: "1945-12" },
+  { club: "Estudiantes (La Plata)", desde: "1948-01", hasta: "1949-12" },
+  { club: "Estudiantes (La Plata)", desde: "2006-07", hasta: "2008-12" },
+  { club: "Estudiantes (La Plata)", desde: "2010-07", hasta: "2011-06" },
+  { club: "Estudiantes (La Plata)", desde: "2016-01", hasta: "2018-06" },
+  { club: "Estudiantes (La Plata)", desde: "2022-01", hasta: "2023-12" },
+  { club: "River Plate", desde: "1915-01", hasta: "1919-08" },
+  { club: "River Plate", desde: "1929-10", hasta: "1933-12" },
+  { club: "River Plate", desde: "1936-07", hasta: "1950-12" },
+  { club: "River Plate", desde: "1990-07", hasta: "1998-06" },
+  { club: "River Plate", desde: "1999-01", hasta: "2005-06" },
+  { club: "River Plate", desde: "2006-01", hasta: "2007-06" },
+  { club: "River Plate", desde: "2008-01", hasta: "2008-12" },
+  { club: "River Plate", desde: "2011-07", hasta: "2013-06" },
+  { club: "River Plate", desde: "2016-07", hasta: "2025-06" },
+  { club: "Porteño", desde: "1915-01", hasta: "1916-12" },
+  { club: "Platense", desde: "1916-01", hasta: "1917-12" },
+  { club: "Platense", desde: "1927-01", hasta: "1927-12" },
+  { club: "Platense", desde: "1949-01", hasta: "1950-12" },
+  { club: "Platense", desde: "1999-07", hasta: "2000-06" },
+  { club: "Platense", desde: "2006-07", hasta: "2007-06" },
+  { club: "Gimnasia (La Plata)", desde: "1916-01", hasta: "1917-12" },
+  { club: "Gimnasia (La Plata)", desde: "1929-10", hasta: "1930-12" },
+  { club: "Gimnasia (La Plata)", desde: "1995-01", hasta: "1996-12" },
+  { club: "Gimnasia (La Plata)", desde: "1998-01", hasta: "1999-06" },
+  { club: "Gimnasia (La Plata)", desde: "2000-07", hasta: "2001-06" },
+  { club: "Gimnasia (La Plata)", desde: "2002-01", hasta: "2002-12" },
+  { club: "Gimnasia (La Plata)", desde: "2005-07", hasta: "2006-06" },
+  { club: "Gimnasia (La Plata)", desde: "2012-07", hasta: "2014-06" },
+  { club: "Boca Juniors", desde: "1918-01", hasta: "1938-12" },
+  { club: "Boca Juniors", desde: "1943-01", hasta: "1948-12" },
+  { club: "Boca Juniors", desde: "1950-01", hasta: "1951-12" },
+  { club: "Boca Juniors", desde: "1990-07", hasta: "1994-06" },
+  { club: "Boca Juniors", desde: "1996-07", hasta: "1996-12" },
+  { club: "Boca Juniors", desde: "1997-07", hasta: "2004-12" },
+  { club: "Boca Juniors", desde: "2005-07", hasta: "2009-06" },
+  { club: "Boca Juniors", desde: "2015-01", hasta: "2023-06" },
+  { club: "Boca Juniors", desde: "2025-01", hasta: "2026-06" },
+  { club: "Banfield", desde: "1920-01", hasta: "1921-12" },
+  { club: "Banfield", desde: "2003-07", hasta: "2004-06" },
+  { club: "Banfield", desde: "2005-01", hasta: "2005-12" },
+  { club: "Banfield", desde: "2007-07", hasta: "2008-06" },
+  { club: "Banfield", desde: "2009-07", hasta: "2010-06" },
+  { club: "Banfield", desde: "2013-07", hasta: "2014-12" },
+  { club: "Banfield", desde: "2016-07", hasta: "2018-06" },
+  { club: "Del Plata", desde: "1921-01", hasta: "1924-12" },
+  { club: "Nueva Chicago", desde: "1923-01", hasta: "1926-12" },
+  { club: "Nueva Chicago", desde: "2004-07", hasta: "2005-06" },
+  { club: "Nueva Chicago", desde: "2006-01", hasta: "2006-12" },
+  { club: "Sp. Palermo", desde: "1922-01", hasta: "1923-12" },
+  { club: "Sp. Barracas", desde: "1923-01", hasta: "1924-12" },
+  { club: "Sp. Dock Sud", desde: "1923-01", hasta: "1925-12" },
+  { club: "Temperley", desde: "1924-01", hasta: "1926-12" },
+  { club: "All Boys", desde: "1924-01", hasta: "1925-12" },
+  { club: "El Porvenir", desde: "1925-01", hasta: "1926-12" },
+  { club: "Argentinos Juniors", desde: "1926-01", hasta: "1927-12" },
+  { club: "Argentinos Juniors", desde: "2004-01", hasta: "2004-12" },
+  { club: "Argentinos Juniors", desde: "2010-07", hasta: "2010-12" },
+  { club: "Argentinos Juniors", desde: "2024-01", hasta: "2025-12" },
+  { club: "San Lorenzo", desde: "1927-01", hasta: "1939-12" },
+  { club: "San Lorenzo", desde: "1941-01", hasta: "1944-12" },
+  { club: "San Lorenzo", desde: "1946-01", hasta: "1947-12" },
+  { club: "San Lorenzo", desde: "1991-06", hasta: "1993-06" },
+  { club: "San Lorenzo", desde: "1994-07", hasta: "1996-06" },
+  { club: "San Lorenzo", desde: "1998-01", hasta: "1998-06" },
+  { club: "San Lorenzo", desde: "1999-01", hasta: "1999-12" },
+  { club: "San Lorenzo", desde: "2001-01", hasta: "2001-12" },
+  { club: "San Lorenzo", desde: "2003-07", hasta: "2004-06" },
+  { club: "San Lorenzo", desde: "2007-07", hasta: "2009-06" },
+  { club: "San Lorenzo", desde: "2015-01", hasta: "2016-06" },
+  { club: "San Lorenzo", desde: "2017-07", hasta: "2019-06" },
+  { club: "San Lorenzo", desde: "2023-01", hasta: "2023-12" },
+  { club: "Lanús", desde: "1927-01", hasta: "1930-12" },
+  { club: "Lanús", desde: "1995-07", hasta: "1998-12" },
+  { club: "Lanús", desde: "2006-01", hasta: "2006-12" },
+  { club: "Lanús", desde: "2007-07", hasta: "2008-06" },
+  { club: "Lanús", desde: "2009-01", hasta: "2009-12" },
+  { club: "Lanús", desde: "2011-01", hasta: "2011-12" },
+  { club: "Lanús", desde: "2016-01", hasta: "2017-06" },
+  { club: "Lanús", desde: "2023-01", hasta: "2023-12" },
+  { club: "Ferro C. Oeste", desde: "1927-01", hasta: "1928-12" },
+  { club: "Independiente", desde: "1927-01", hasta: "1929-12" },
+  { club: "Independiente", desde: "1932-01", hasta: "1936-06" },
+  { club: "Independiente", desde: "1937-01", hasta: "1940-12" },
+  { club: "Independiente", desde: "1945-01", hasta: "1949-12" },
+  { club: "Independiente", desde: "1950-01", hasta: "1951-12" },
+  { club: "Independiente", desde: "1990-07", hasta: "1991-12" },
+  { club: "Independiente", desde: "1993-01", hasta: "1995-06" },
+  { club: "Independiente", desde: "1996-07", hasta: "1998-06" },
+  { club: "Independiente", desde: "2000-01", hasta: "2000-12" },
+  { club: "Independiente", desde: "2002-07", hasta: "2003-06" },
+  { club: "Independiente", desde: "2013-07", hasta: "2016-12" },
+  { club: "Talleres", desde: "1930-01", hasta: "1931-12" },
+  { club: "Newell's Old Boys (Rosario)", desde: "1941-01", hasta: "1942-12" },
+  { club: "Newell's Old Boys (Rosario)", desde: "1990-07", hasta: "1992-12" },
+  { club: "Newell's Old Boys (Rosario)", desde: "1997-01", hasta: "1997-12" },
+  { club: "Newell's Old Boys (Rosario)", desde: "2004-07", hasta: "2005-06" },
+  { club: "Newell's Old Boys (Rosario)", desde: "2009-07", hasta: "2010-06" },
+  { club: "Vélez Sarsfield", desde: "1992-01", hasta: "1997-06" },
+  { club: "Vélez Sarsfield", desde: "1998-01", hasta: "1998-12" },
+  { club: "Vélez Sarsfield", desde: "2003-01", hasta: "2003-12" },
+  { club: "Vélez Sarsfield", desde: "2004-07", hasta: "2006-06" },
+  { club: "Vélez Sarsfield", desde: "2009-01", hasta: "2009-12" },
+  { club: "Vélez Sarsfield", desde: "2010-07", hasta: "2011-12" },
+  { club: "Vélez Sarsfield", desde: "2019-07", hasta: "2021-12" },
+  { club: "Vélez Sarsfield", desde: "2024-07", hasta: "2025-06" },
+  { club: "Español", desde: "1992-07", hasta: "1993-06" },
+  { club: "Rosario Central", desde: "1994-01", hasta: "1994-12" },
+  { club: "Rosario Central", desde: "1995-07", hasta: "1995-12" },
+  { club: "Rosario Central", desde: "1997-07", hasta: "1998-06" },
+  { club: "Rosario Central", desde: "1999-07", hasta: "2000-06" },
+  { club: "Rosario Central", desde: "2012-07", hasta: "2014-06" },
+  { club: "Rosario Central", desde: "2015-01", hasta: "2016-06" },
+  { club: "Colón (Santa Fe)", desde: "1997-01", hasta: "1997-12" },
+  { club: "Colón (Santa Fe)", desde: "2000-01", hasta: "2000-12" },
+  { club: "Talleres (Córdoba)", desde: "2004-01", hasta: "2004-12" },
+  { club: "Talleres (Córdoba)", desde: "2017-07", hasta: "2019-06" },
+  { club: "Talleres (Córdoba)", desde: "2021-07", hasta: "2022-06" },
+  { club: "Talleres (Córdoba)", desde: "2023-01", hasta: "2023-12" },
+  { club: "Talleres (Córdoba)", desde: "2024-07", hasta: "2025-06" },
+  { club: "Quilmes", desde: "1999-07", hasta: "2000-06" },
+  { club: "Quilmes", desde: "2011-07", hasta: "2013-06" },
+  { club: "Los Andes", desde: "1999-07", hasta: "2000-06" },
+  { club: "Instituto (Córdoba)", desde: "2003-07", hasta: "2004-06" },
+  { club: "Instituto (Córdoba)", desde: "2011-07", hasta: "2013-06" },
+  { club: "Belgrano (Córdoba)", desde: "2003-07", hasta: "2004-06" },
+  { club: "Belgrano (Córdoba)", desde: "2006-01", hasta: "2006-12" },
+  { club: "San Martín (Mendoza)", desde: "2003-07", hasta: "2004-06" },
+  { club: "Almagro", desde: "2004-01", hasta: "2004-12" },
+  { club: "Almagro", desde: "2005-07", hasta: "2006-06" },
+  { club: "Huracán (Tres Arroyos)", desde: "2004-01", hasta: "2004-12" },
+  { club: "Tiro Federal (Rosario)", desde: "2004-07", hasta: "2005-06" },
+  { club: "Gimnasia (Jujuy)", desde: "2005-01", hasta: "2005-12" },
+  { club: "CAI (Cro. Rivadavia)", desde: "2005-01", hasta: "2005-12" },
+  { club: "Atl. Rafaela", desde: "2005-01", hasta: "2005-12" },
+  { club: "Godoy Cruz (Mendoza)", desde: "2005-07", hasta: "2006-06" },
+  { club: "Godoy Cruz (Mendoza)", desde: "2010-07", hasta: "2011-12" },
+  { club: "Godoy Cruz (Mendoza)", desde: "2017-07", hasta: "2019-06" },
+  { club: "Chacarita Juniors", desde: "2005-07", hasta: "2006-06" },
+  { club: "San Martín (San Juan)", desde: "2006-01", hasta: "2006-12" },
+  { club: "Olimpo (Bahía Blanca)", desde: "2006-07", hasta: "2007-12" },
+  { club: "Olimpo (Bahía Blanca)", desde: "2012-07", hasta: "2014-06" },
+  { club: "Tigre", desde: "2006-07", hasta: "2009-06" },
+  { club: "Defensa y Justicia", desde: "2007-01", hasta: "2007-12" },
+  { club: "Defensa y Justicia", desde: "2013-07", hasta: "2014-12" },
+  { club: "Defensa y Justicia", desde: "2018-07", hasta: "2020-07" },
+  { club: "Defensa y Justicia", desde: "2021-07", hasta: "2022-06" },
+  { club: "Arsenal", desde: "2010-07", hasta: "2011-06" },
+  { club: "Unión (Santa Fe)", desde: "2014-07", hasta: "2014-12" },
+  { club: "Unión (Santa Fe)", desde: "2025-07", hasta: "2026-06" },
+  { club: "Crucero del Norte (Posadas)", desde: "2014-07", hasta: "2014-12" },
+  { club: "Atl. Tucumán", desde: "2022-07", hasta: "2023-06" }
+];
+
+function ymToIndex(ym) {
+  const [y, m] = ym.split("-").map(Number);
+  return y * 12 + m;
+}
+function esClasico(rival, fecha) {
+  if (!rival || !fecha) return false;
+
+  // fecha viene como "dd/mm/yyyy"
+  const partes = fecha.split("/");
+  const d = Number(partes[0]);
+  const m = Number(partes[1]);
+  const y = Number(partes[2]);
+
+  const partidoIndex = y * 12 + m;
+  const rivalNorm = rival.toLowerCase();
+
+  return CLASICOS.some(c => {
+    const desde = ymToIndex(c.desde);
+    const hasta = ymToIndex(c.hasta);
+
+    return (
+      rivalNorm.includes(c.club.toLowerCase()) &&
+      partidoIndex >= desde &&
+      partidoIndex <= hasta
+    );
+  });
+}
+function calcularPuntosPartido(p, minutos) {
+  const situacion = cap(norm(p.Situación));   // Victoria / Empate / Derrota
+  const condicion = cap(norm(p.Condición));   // Local / Neutral / Visitante
+
+  let coef = COEF_BASE[situacion]?.[condicion] ?? 0;
+
+  if (esInternacional(p.Torneo)) coef += 0.2;
+  if (esClasico(p.Rival, p.Fecha)) coef += 0.2;
+  if (esNacionalB(p.Torneo)) coef -= 0.1;
+
+  return minutos * coef;
+}    function bucketCompetencia(torneo) {
       const t = norm(torneo || "");
       if (t.includes("apertura nacional b 2006")) return "Apertura BN 2006/07";
       if (t.includes("clausura nacional b 2007")) return "Clausura BN 2006/07";
@@ -249,7 +497,7 @@ ${futbolista.foto1 ?
   : ""}
       <div style="text-align:center;">
   <h2>${futbolista.futbolista}</h2>
-  <div style="font-size:14px; color:black; font-family:Arial, sans-serif;">
+  <div style="font-size:14px; color:black; font-family:Helvetica, sans-serif;">
     ${getResumenCarrera(futbolista.futbolista)}
   </div>
   ${futbolista.pais
@@ -263,6 +511,9 @@ ${futbolista.foto1 ?
   <div class="trayectoria-escudos">
     ${renderTrayectoriaEscudos(futbolista.trayectoria)}
   </div>
+  <!-- 🔥 RENDIMIENTO GENERAL -->
+  ${getResumenRendimientoFutbolista(futbolista.futbolista)}
+
   </div>
   </div>
     <p><b>Nombre:</b> ${futbolista.nombre}</p>
@@ -282,8 +533,10 @@ ${futbolista.foto1 ?
   : ""}
 </div>
 <div class="stats">
-  <h3 style="color:#FF0000;">📊 TRAYECTORIA EN HURACÁN</h3>
+
+  <h3 style="color:#FF0000;">📊 Trayectoria en Huracán</h3>
   ${renderEstadisticas(futbolista.futbolista)}
+
 </div>
       `;
   }
@@ -320,6 +573,68 @@ function obtenerMinutoSalida(texto, futbolista) {
   return m.includes("+")
     ? m.split("+").map(Number).reduce((a,b)=>a+b)
     : Number(m);
+}
+function getResumenRendimientoFutbolista(nombreFutbolista) {
+
+  const delFutbolista = encuentros.filter(p => {
+    const jugadores = (p.Huracán || "")
+      .replace(/[()]/g, ",")
+      .replace(/\b\d+(?:\+\d+)?\s*/g, "")
+      .replace(/\.+/g, "")
+      .replace(/\s+y\s+/gi, ",")
+      .replace(/\s+e\s+/gi, ",")
+      .replace(/,,+/g, ",")
+      .replace(/\s+,/g, ",")
+      .replace(/,\s+/g, ",")
+      .replace(/\s+/g, " ")
+      .split(/[,;]+/)
+      .map(j => j.trim())
+      .filter(j => j.length > 1);
+
+    return jugadores.some(j => norm(j) === norm(nombreFutbolista));
+  });
+
+  if (!delFutbolista.length) return "";
+
+  const total = delFutbolista.length;
+  const victorias = delFutbolista.filter(p => norm(p.Situación) === "victoria").length;
+  const empates   = delFutbolista.filter(p => norm(p.Situación) === "empate").length;
+  const derrotas  = delFutbolista.filter(p => norm(p.Situación) === "derrota").length;
+
+  const efectividad = ((victorias * 3 + empates) * 100 / (total * 3)).toFixed(1);
+
+  let color;
+  if (efectividad < 30) color = "#e74c3c";
+  else if (efectividad < 45) color = "#f1c40f";
+  else color = "#2ecc71";
+
+  const fechas = delFutbolista
+    .map(p => {
+      const [d, m, a] = p.Fecha.split("/");
+      return new Date(`${a}-${m}-${d}`);
+    })
+    .sort((a,b) => a - b);
+
+  const desde = fechas[0].getFullYear();
+  const hasta = fechas[fechas.length - 1].getFullYear();
+
+  return `
+    <div style="margin-bottom:10px;">
+    <!-- <div>${total} ${total === 1 ? "partido" : "partidos"} (${desde}-${hasta})</div> -->
+      <div>
+        <span style="
+          background:${color};
+          color:white;
+          padding:4px 8px;
+          border-radius:6px;
+          font-weight:bold;
+          font-size:15px;
+        ">
+          ${efectividad}%</span>
+        <span>de efectividad</span>
+      </div>
+    </div>
+  `;
 }
 function renderEstadisticas(nombreFutbolista) {
   const delFutbolista = encuentros.filter(p => {
@@ -539,11 +854,17 @@ if (expulsionRegex.test(incidencias)) {
     minutosJugados = Math.max(0, minutoExpulsion - minutoIngreso + 1);
   }
 }
+const puntosPartido = calcularPuntosPartido(p, minutosJugados);
+
        contenedor.innerHTML += `
           <div class="acordeon">
           <div class="acordeon-header">
- ${condicion} (${minutosJugados}’) ·
- ${p.Resultado1}-${p.Resultado2}
+${condicion} (${minutosJugados}’) ·
+${p.Resultado1}-${p.Resultado2}
+<span style="font-weight:bold; margin-left:6px;
+             color:${puntosPartido >= 0 ? '#006400' : '#8B0000'}">
+  (${puntosPartido.toFixed(1)})
+</span>
   <img src="${getEscudo(p.Club)}" alt="${p.Club}" title="${p.Club}"
        style="height:22px; vertical-align:middle; margin:0 6px;">
   [${p.Técnico}]
@@ -724,21 +1045,32 @@ function debounce(func, delay) {
 
 function filtrarFutbolistas(termino) {
   const termNorm = norm(termino);
-  if (!termNorm) {
-    suggestionsList.innerHTML = "";
-    return;
-  }
+  suggestionsList.innerHTML = "";
+  selectedIndex = -1;
+
+  if (!termNorm) return;
 
   const resultados = futbolistas
     .filter(a => norm(a.futbolista).includes(termNorm))
-    .slice(0, 15); // limitar cantidad de sugerencias
+    .slice(0, 15);
 
-  suggestionsList.innerHTML = resultados.map(r => `
-    <li style="padding:6px;cursor:pointer;border-bottom:1px solid #eee;" 
-        onclick="seleccionarFutbolista('${r.futbolista.replace(/'/g, "\\'")}')">
-      ${r.futbolista}
-    </li>
-  `).join("");
+  resultados.forEach(r => {
+    const li = document.createElement("li");
+    li.className = "autocomplete-item";
+
+    li.innerHTML = `
+      ${r.foto1
+        ? `<img src="${r.foto1}" onerror="this.style.display='none'">`
+        : `<div style="width:32px;height:42px;"></div>`}
+      <span>${InvertirNombre(r.futbolista)}</span>
+    `;
+
+    li.addEventListener("click", () => {
+      seleccionarFutbolista(r.futbolista);
+    });
+
+    suggestionsList.appendChild(li);
+  });
 }
 
 searchInput.addEventListener("input", debounce(e => filtrarFutbolistas(e.target.value), 200));
