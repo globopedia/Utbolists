@@ -547,7 +547,11 @@ encuentros = [...partidos1, ...partidos2, ...partidos3, ...partidos4].map(p => (
         Huracán: (p.Huracán ?? "").trim(),
         Rival: (p.Rival ?? "").trim(),
         Foto: (p.Foto ?? "").trim(),
-        Incidencias: (p.Incidencias ?? "").trim()
+        Incidencias: (p.Incidencias ?? "").trim(),
+        Fin1T: (p.Fin1T ?? "").trim(),
+        Fin2T: (p.Fin2T ?? "").trim(),
+        Fin1E: (p.Fin1E ?? "").trim(),
+        Fin2E: (p.Fin2E ?? "").trim()
       }));
 
       llenarSelectFutbolistas();
@@ -881,14 +885,33 @@ const texto = p.Huracán || "";
 const jugador = futbolista; // ← el nombre que ya usás en el index
 let condicion = "Titular";
 
-let minutosJugados = p.Fin2T || 90;
+function parseMinuto(valor, fallback = 0) {
+  if (valor == null || valor === "") return fallback;
 
-// normalizar fin del partido
-if (typeof minutosJugados === "string" && minutosJugados.includes("+")) {
-  const [a, b] = minutosJugados.split("+").map(Number);
-  minutosJugados = a + b;
+  const limpio = String(valor).trim();
+
+  if (limpio.includes("+")) {
+    const [base, extra] = limpio.split("+").map(Number);
+    return (base || 0) + (extra || 0);
+  }
+
+  const n = Number(limpio);
+  return isNaN(n) ? fallback : n;
 }
-minutosJugados = Number(minutosJugados) || 90;
+
+console.log("Objeto partido completo:", p);
+console.log("Fin2T leído:", p.Fin2T);
+let finReal = 0;
+
+if (p.Fin2E && p.Fin2E !== "0") {
+  // hubo tiempo extra → usar Fin2E
+  finReal = parseMinuto(p.Fin2E, 120);
+} else {
+  // partido normal → usar Fin2T
+  finReal = parseMinuto(p.Fin2T, 90);
+}
+
+let minutosJugados = finReal;
 
 // patrón: "Jugador (73 Otro)"
 const saleRegex = new RegExp(`${jugador}\\s*\\((\\d+(?:\\+\\d+)?)`, "i");
@@ -896,18 +919,23 @@ const saleRegex = new RegExp(`${jugador}\\s*\\((\\d+(?:\\+\\d+)?)`, "i");
 // patrón: "(73 Jugador)"
 const entraRegex = new RegExp(`\\((\\d+(?:\\+\\d+)?)\\s*${jugador}`, "i");
 
-const ingreso = obtenerMinutoIngreso(texto, futbolista);
-const salida  = obtenerMinutoSalida(texto, futbolista);
+let ingreso = obtenerMinutoIngreso(texto, futbolista);
+let salida  = obtenerMinutoSalida(texto, futbolista);
+
+ingreso = ajustarMinuto(ingreso, p);
+salida  = ajustarMinuto(salida, p);
 
 if (ingreso !== null) {
   // 👉 siempre suplente si tiene minuto de ingreso
   condicion = "Suplente";
 
-  let finReal = p.Fin2T ? Number(p.Fin2T) : 90;
+ let finJugador = finReal;
 
-  if (salida !== null) {
-    finReal = salida - 1;
-  }
+if (salida !== null) {
+  finJugador = salida - 1;
+}
+
+minutosJugados = Math.max(0, finJugador - ingreso + 1);
 
   minutosJugados = Math.max(0, finReal - ingreso + 1);
 
@@ -915,8 +943,11 @@ if (ingreso !== null) {
   // 👉 titular que fue reemplazado
   condicion = "Titular";
   minutosJugados = Math.max(0, salida - 1);
-}
 
+} else {
+  // 👉 titular que jugó todo el partido
+  minutosJugados = finReal;
+}
 // --- EXPULSIONES ---
 const incidencias = p.Incidencias || "";
 
@@ -926,7 +957,9 @@ const expulsionRegex = new RegExp(
   "i"
 );
 
+let fueExpulsado = false;
 if (expulsionRegex.test(incidencias)) {
+  fueExpulsado = true;
   const m = incidencias.match(expulsionRegex)[1];
 
   let minutoExpulsion = m.includes("+")
@@ -936,20 +969,47 @@ if (expulsionRegex.test(incidencias)) {
   if (condicion === "Titular") {
     // jugó hasta el minuto anterior a la expulsión
     minutosJugados = Math.max(0, minutoExpulsion - 1);
-  } else {
+  }
+ else {
     // suplente expulsado
     // ingreso = fin del partido - minutos jugados + 1
-    const fin = p.Fin2T ? Number(p.Fin2T) : 90;
+    const fin = finReal;
     const minutoIngreso = fin - minutosJugados + 1;
     minutosJugados = Math.max(0, minutoExpulsion - minutoIngreso + 1);
   }
+}
+// --- GOLES ---
+let golesJugador = 0;
+
+const golRegex = new RegExp(
+  `(\\d+(?:\\+\\d+)?)\\s+GOL\\s+${futbolista}\\s*\\(HUR\\)`,
+  "gi"
+);
+
+const golesMatch = incidencias.match(golRegex);
+
+if (golesMatch) {
+  golesJugador = golesMatch.length;
+}
+
+let iconoGol = "";
+
+if (golesJugador > 0) {
+  iconoGol = "⚽".repeat(golesJugador);
 }
 const puntosPartido = calcularPuntosPartido(p, minutosJugados);
 
        contenedor.innerHTML += `
           <div class="acordeon">
           <div class="acordeon-header">
-${condicion} (${minutosJugados}’) ·
+${fueExpulsado ? `
+<span title="Expulsado" style="display:inline-block; transform: rotate(-20deg); margin-right:6px;">
+  <svg width="12" height="16" viewBox="0 0 12 16">
+    <rect x="1" y="1" width="10" height="14" rx="2" ry="2"
+          fill="#d40000" stroke="#8b0000" stroke-width="1"/>
+  </svg>
+</span>
+` : ""}${iconoGol ? iconoGol + " " : ""}${condicion} (${minutosJugados}’) ·
 ${p.Resultado1}-${p.Resultado2}
 <span style="font-weight:bold; margin-left:6px;
              color:${puntosPartido >= 0 ? '#006400' : '#8B0000'}">
@@ -1254,6 +1314,37 @@ searchInput.addEventListener("focus", function(e) {
     }
   }, 150);
 });
+
+function ajustarMinuto(minuto, p) {
+  if (minuto == null) return null;
+
+  let m = minuto;
+
+  if (typeof m === "string" && m.includes("+")) {
+    m = m.split("+").map(Number).reduce((a,b)=>a+b);
+  } else {
+    m = Number(m);
+  }
+
+  const finPT = Number(p.FinPT) || 45;
+
+  // 👉 si es ST (tu convención: >= 46)
+  if (m >= 46) {
+    return m + (finPT - 45);
+  }
+
+  return m;
+}
+function parseMinuto(minutoStr) {
+  if (!minutoStr) return 0;
+
+  if (minutoStr.includes("+")) {
+    const [base, extra] = minutoStr.split("+").map(Number);
+    return base + extra;
+  }
+
+  return Number(minutoStr);
+}
 </script>
 </body>
 </html>
