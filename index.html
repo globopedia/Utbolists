@@ -97,8 +97,8 @@
                                 "Campeonato 1945","Campeonato 1946","Campeonato 1947","Campeonato 1948","Campeonato 1949",
                                 "Campeonato 1950","Campeonato 1951","Campeonato 1952","Copa Competencia 1952","Campeonato 1953","Campeonato 1954",
                                 "Campeonato 1955","Campeonato 1956","Campeonato 1957","Campeonato 1958","Copa Suecia 1958","Campeonato 1959",
-                                "Campeonato 1960","Campeonato 1961","Campeonato 1962","Campeonato 1963","Campeonato 1964",
-                                "Campeonato 1965","Campeonato 1966","Campeonato Metropolitano 1967","Torneo Promocional 1967","Campeonato Metropolitano 1968","Campeonato Nacional 1968","Copa Argentina 1969","Campeonato Metropolitano 1969","Campeonato Nacional 1969",
+                                "Campeonato 1960","Campeonato 1961","Campeonato 1962","Campeonato 1963","Copa Jorge Newbery 1964","Campeonato 1964",
+                                "Campeonato 1965","Campeonato 1966","Campeonato Metropolitano 1967","Torneo Minas Gerais 1967","Torneo Negrao de Lima 1967","Torneo Promocional 1967","Campeonato Metropolitano 1968","Gira por Europa 1968","Trofeo San Sebastián 1968","Campeonato Nacional 1968","Copa Argentina 1969","Campeonato Metropolitano 1969","Campeonato Nacional 1969",
                                 "Copa Argentina 1970","Campeonato Metropolitano 1970","Torneo Reclasificatorio 1970","Campeonato Metropolitano 1971","Campeonato Nacional 1971","Campeonato Metropolitano 1972","Campeonato Nacional 1972","Copa de Oro 1973","Campeonato Metropolitano 1973","Campeonato Nacional 1973","Copa Libertadores 1974","Campeonato Metropolitano 1974","Campeonato Nacional 1974",
                                 "Campeonato Metropolitano 1975","Campeonato Nacional 1975","Clasificación 1975 Pre-Libertadores","Campeonato Metropolitano 1976","Campeonato Nacional 1976","Clasificación 1976 Pre-Libertadores","Campeonato Metropolitano 1977","Campeonato Nacional 1977","Campeonato Metropolitano 1978","Trofeo Costa del Sol 1978","Trofeo Naranja 1978","Campeonato Nacional 1978","Campeonato Metropolitano 1979","Campeonato Nacional 1979",
                                 "Primera División 1980","Campeonato Nacional 1980","Primera División 1981","Campeonato Nacional 1981","Campeonato Nacional 1982","Primera División 1982","Trofeo Cartagena de Indias 1983","Amistosos 1983","Campeonato Nacional 1983","Primera División 1983","Campeonato Nacional 1984","Primera División 1984","Trofeo Ciudad de Badajoz 1984",
@@ -372,13 +372,17 @@ function calcularPuntosPartido(p, minutos) {
       if (t.includes("campeonato 1961")) return "Campeonato 1961";
       if (t.includes("campeonato 1962")) return "Campeonato 1962";
       if (t.includes("campeonato 1963")) return "Campeonato 1963";
-      if (t.includes("newbery")) return "Torneo Jorge Newbery 1964";
+      if (t.includes("newbery")) return "Copa Jorge Newbery 1964";
       if (t.includes("campeonato 1964")) return "Campeonato 1964";
       if (t.includes("campeonato 1965")) return "Campeonato 1965";
       if (t.includes("campeonato 1966")) return "Campeonato 1966";
       if (t.includes("metropolitano 1967")) return "Campeonato Metropolitano 1967";
+      if (t.includes("gerais 1967")) return "Torneo Minas Gerais 1967";
+      if (t.includes("lima 1967")) return "Torneo Negrao de Lima 1967";
       if (t.includes("promocional")) return "Torneo Promocional 1967";
       if (t.includes("metropolitano 1968")) return "Campeonato Metropolitano 1968";
+      if (t.includes("europa 1968")) return "Gira por Europa 1968";
+      if (t.includes("sebastian 1968")) return "Trofeo San Sebastián 1968";
       if (t.includes("nacional 1968")) return "Campeonato Nacional 1968";
       if (t.includes("argentina 1969")) return "Copa Argentina 1969";
       if (t.includes("metropolitano 1969")) return "Campeonato Metropolitano 1969";
