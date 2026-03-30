@@ -591,7 +591,7 @@ Promise.all([
      const partidos5 = Papa.parse(csvPartidos5, { header:true, skipEmptyLines:true }).data;
      const partidos6 = Papa.parse(csvPartidos6, { header:true, skipEmptyLines:true }).data;
 
-encuentros = [...partidos1, ...partidos2, ...partidos3, ...partidos4].map(p => ({
+encuentros = [...partidos1, ...partidos2, ...partidos3, ...partidos4, ...partidos5, ...partidos6].map(p => ({
         Fecha: (p.Fecha ?? "").trim(),
         Técnico: (p.Técnico ?? "").trim(),
         Condición: (p.Condición ?? "").trim(),
